@@ -10,6 +10,8 @@
   "author": "Studio Process",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "electron": "1.8.2-beta.2"
+    "electron": "1.8.2-beta.2",
+    "stats.js": "^0.17.0",
+    "three": "0.88.0"
   }
 }
