@@ -15,29 +15,90 @@ var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
 
-
+// Renderer
 var scene = new THREE.Scene();
 var camera = new THREE.OrthographicCamera( -W/2, W/2, H/2, -H/2, 1, 1000 );
 camera.position.z = 1; // need to move the camera outward (distance doesn't matter)
 scene.add( camera ); // not needed?
-var renderer = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( W, H );
 document.body.appendChild( renderer.domElement );
 
-var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
-var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-var plane = new THREE.Mesh( geometry, material );
-scene.add( plane );
-console.log(plane.rotation);
+// Geometry
+let squareGeometry = new THREE.PlaneBufferGeometry( 100, 100 );
+let squareMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+var square = new THREE.Mesh( squareGeometry, squareMaterial );
+scene.add( square );
+
+// Data
+let data = require('./assets/first_strokes.json');
+// console.log(data);
+
+// Create Stroke array from event data
+// Stroke: { downTime, upTime, duration, timeDiff, nodes:[Node] }
+// Node: { x, y, timeDiff, pressure }
+function strokesFromEvents(eventData) {
+  return eventData.reduce((acc, event) => {
+    if (event.type == 'updown') {
+      if (event.status == 'down') {
+        let timeDiff = acc.length == 0 ? 0 : event.time - acc[acc.length-1].upTime;
+        acc.push({ downTime: event.time, upTime: 0, duration: 0, timeDiff, nodes: [] });
+      } else if (event.status == 'up') {
+        let stroke = acc[acc.length-1];
+        stroke.upTime = event.time;
+        stroke.duration = stroke.upTime - stroke.downTime;
+      }
+    } else if (event.type == 'stroke') {
+      acc[acc.length-1].nodes.push(event.node);
+    }
+    return acc;
+  }, []);
+}
+
+// Create vertex array for rendering
+function vertexArrayFromStrokes(strokes) {
+  const offset = 5;
+  const scale = 10;
+  
+  let vertexData = strokes.reduce((acc, stroke) => {
+    let strokeVertices = stroke.nodes.reduce((acc, node) => {
+      acc.push( -W/2 + (node.x-offset)*scale, H/2 - (node.y-offset)*scale ); // 
+      return acc;
+    }, []);
+    return acc.concat(strokeVertices);
+  }, []);
+  
+  return new Float32Array(vertexData);
+}
+
+let strokes = strokesFromEvents(data);
+// console.log(strokes);
+let vertexData = vertexArrayFromStrokes(strokes);
+// console.log(vertexData);
+
+let lineGeometry = new THREE.BufferGeometry();
+lineGeometry.addAttribute( 'position', new THREE.BufferAttribute(vertexData, 2) );
+let lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
+let line = new THREE.Line( lineGeometry, lineMaterial );
+scene.add( line );
+
+
+// Render loop
+let prevTime = 0.0;
+let elapsedTime = 0.0;
 
 function animate(time) {
-  requestAnimationFrame( animate );
-  
+  elapsedTime = time-prevTime;
+  prevTime = time;
+  // console.log(elapsedTime)
+  // 
   stats.begin();
   renderer.render( scene, camera );
-  // console.log("animating", time)
-  plane.rotation.z += 0.01;
+  square.rotation.z += 0.01;
+  line.rotation.z -= 0.01;
   stats.end();
+  
+  requestAnimationFrame( animate );
 }
 animate();
 
