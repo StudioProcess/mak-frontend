@@ -3,7 +3,7 @@
 // Receives Pen events
 // Automatically retries the connection when it is closed
 // Exposes an Observable stream of events
-
+const debug = require('debug')('ws');
 const Rx = require('rxjs/Rx');
 const wsSubject = new Rx.Subject();
 const wsObservable = Rx.Observable.from(wsSubject);
@@ -26,29 +26,30 @@ function connect() {
 function reconnect() {
   setTimeout(function() {
     reconnectAttempt++;
+    debug('reconnect attempt ' + reconnectAttempt);
     connect();
   }, reconnectInterval);
 }
 
 function onOpen(evt) {
   reconnectAttempt = 0;
-  console.log('ws open', evt);
+  debug('connection successful', evt);
 }
 
 function onClose(evt) {
-  console.log('ws close', evt);
+  debug('connection closed', evt);
   reconnect();
 }
 
 function onMessage(evt) {
-  console.log('ws message');
+  // debug('msg');
   let data = JSON.parse(evt.data);
   // TODO: handle parse errors
   wsSubject.next(data);
 }
 
 function onError(evt) {
-  console.log('ws error', evt);
+  debug('error', evt);
 }
 
 connect();

@@ -1,3 +1,4 @@
+const debug = "*";
 const electron = require('electron')
 // Module to control application life.
 const app = electron.app
@@ -6,6 +7,9 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+
+// set environment variable for debug package
+process.env['DEBUG'] = debug;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
