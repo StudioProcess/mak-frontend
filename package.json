@@ -13,5 +13,8 @@
     "electron": "1.8.2-beta.2",
     "stats.js": "^0.17.0",
     "three": "0.88.0"
+  },
+  "dependencies": {
+    "earcut": "^2.1.2"
   }
 }
