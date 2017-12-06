@@ -4,7 +4,7 @@
 const stream = require('./ws');
 console.log(stream);
 
-
+stream.subscribe(e => console.log(e));
 
 const app = require("electron").remote.app;
 const THREE = require('three');
