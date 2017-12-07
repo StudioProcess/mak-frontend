@@ -14,9 +14,11 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
-    "earcut": "2.1.2",
-    "rxjs": "5.5.4",
-    "stats.js": "0.17.0",
-    "three": "0.88.0"
+    "earcut": "^2.1.2",
+    "pouchdb": "^6.3.4",
+    "rxjs": "^5.5.4",
+    "stats.js": "^0.17.0",
+    "three": "^0.88.0",
+    "worker-pouch": "^2.0.0"
   }
 }

@@ -1,10 +1,14 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-const stream = require('./ws');
-console.log(stream);
 
-stream.subscribe(e => console.log(e));
+
+// const stream = require('./ws');
+// console.log(stream);
+// stream.subscribe(e => console.log(e));
+
+const dh = require('./data'); // data handling
+
 
 const app = require("electron").remote.app;
 const THREE = require('three');

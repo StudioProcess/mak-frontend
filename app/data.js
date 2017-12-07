@@ -7,8 +7,9 @@
 const debug = require('debug')('data');
 const Rx = require('rxjs/Rx');
 const penEvents = require('./ws');
+const db = require('./database');
 
-
+debug(db);
 
 // Create Stroke array from event data
 // Stroke: { downTime, upTime, duration, timeDiff, nodes:[Node] }
