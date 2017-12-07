@@ -58,5 +58,5 @@ typings/
 .env
 
 # database data
-db/*
-!db/.gitkeep
+db_data/*
+!db_data/.gitkeep
