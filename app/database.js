@@ -7,6 +7,7 @@ const PouchDB = require('pouchdb');
 const folder = './db/';
 
 PouchDB.adapter('worker', require('worker-pouch'));
+PouchDB.debug.disable(); // disable debug output
 
 let databases = {
   events: new PouchDB(folder + 'events'), // raw pen event stream

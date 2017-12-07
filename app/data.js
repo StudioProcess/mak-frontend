@@ -5,11 +5,39 @@
 // Provides battery/status events
 
 const debug = require('debug')('data');
-const Rx = require('rxjs/Rx');
-const penEvents = require('./ws');
+// const Rx = require('rxjs/Rx');
+const penEvent$ = require('./ws');
 const db = require('./database');
 
-debug(db);
+
+// dump event data (for debugging)
+db.events.allDocs({include_docs: true}).then(data => {
+  debug("dump", data);
+});
+
+
+// Directly store all raw pen events
+// adds timestamp field to every event
+// uses sequential counter as pouch id
+let timestampedEvent$ = penEvent$.map(event => {
+  event.timestamp = Date.now();
+  return event;
+});
+
+db.events.info().then(info => {
+  // first get total event count
+  let eventCount = info.doc_count;
+  debug("total event count:", eventCount);
+  
+  timestampedEvent$.subscribe(event => {
+    event._id = "" + eventCount++;
+    db.events.put(event).then((res) => {
+      debug('stored event:', event);
+    });
+  });
+});
+
+
 
 // Create Stroke array from event data
 // Stroke: { downTime, upTime, duration, timeDiff, nodes:[Node] }
