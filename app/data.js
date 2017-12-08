@@ -16,6 +16,10 @@ const DUMP_ALL_DATA = 0;
 const CLEAR_ALL_DATA = 0;
 // ------ WARNING ------
 
+const DEFAULT_OWNER_ID = 28;
+const DEFAULT_SECTION_ID = 3;
+const DEFAULT_NOTE_ID = 24;
+
 
 
 const clearAllData = () => {
@@ -133,6 +137,7 @@ const noteIdEquals = (a, b) => {
 };
 
 
+// Zero pad a number to a certain width
 function zeroFill( number, width ) {
   width -= number.toString().length;
   if ( width > 0 ) {
@@ -144,6 +149,7 @@ function zeroFill( number, width ) {
 // Generate an indexable/sortable stroke id
 // will look like: 00-00-00-0000-0000000000000000
 // ownerId-sectionId-noteId-pageNum-strokeIdx
+// omit strokeIdx to get: 00-00-00-0000
 const generateStrokeId = (noteId, strokeIdx) => {
   let ni = {
     ownerId: 0,
@@ -157,14 +163,42 @@ const generateStrokeId = (noteId, strokeIdx) => {
     if (noteId.noteId) ni.noteId = noteId.noteId;
     if (noteId.pageNum) ni.pageNum = noteId.pageNum;
   }
-  if (!strokeIdx) strokeIdx = 0;
-  
-  return zeroFill(ni.ownerId, 2) 
-  + "-" + zeroFill(ni.sectionId, 2) 
-  + "-" + zeroFill(ni.noteId, 2)
-  + "-" + zeroFill(ni.pageNum, 4)
-  + "-" + zeroFill(strokeIdx, 16)
+  let id = zeroFill(ni.ownerId, 2) 
+    + "-" + zeroFill(ni.sectionId, 2) 
+    + "-" + zeroFill(ni.noteId, 2)
+    + "-" + zeroFill(ni.pageNum, 4)
+  if (strokeIdx != undefined) id += "-" + zeroFill(strokeIdx, 16);
+  return id;
 };
+
+
+// Create an NoteId Object for a certain page number using default values
+const createNoteIdForPage = (pageNum) => {
+  return {
+    ownerId: DEFAULT_OWNER_ID,
+    sectionId: DEFAULT_SECTION_ID,
+    noteId: DEFAULT_NOTE_ID,
+    pageNum
+  };
+};
+
+
+// Get strokes for a certain page
+// Returns: Promise<[Stroke]>
+const getPage = (n) => {
+  return db.strokes.allDocs({ 
+    include_docs: true,
+    startkey: generateStrokeId( createNoteIdForPage(n) ),
+    endkey: generateStrokeId( createNoteIdForPage(n+1) ),
+    inclusive_end: false
+  }).then((result) => {
+    return result.rows.map(row => row.doc);
+  });
+};
+
+getPage(4).then(data => {
+  debug("page 4 data", data);
+});
 
 module.exports = {
   event$: event$,
