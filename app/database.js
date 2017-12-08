@@ -10,7 +10,6 @@ const DB_FOLDER = 'db_data';
 const DUMP_FOLDER = 'db_dump_json';
 
 
-
 PouchDB.adapter('worker', require('worker-pouch'));
 PouchDB.debug.disable(); // disable debug output
 
@@ -26,7 +25,7 @@ const databases = {};
 const createOrOpenAll = () => {
   databases.events = createOrOpenDB('events'); // raw pen event stream
   databases.strokes = createOrOpenDB('strokes'); // collated strokes
-  databases.pages = createOrOpenDB('pages'); // contains refs to strokes
+  // databases.pages = createOrOpenDB('pages'); // contains refs to strokes
 };
 
 createOrOpenAll();
@@ -35,7 +34,7 @@ databases.clear = () => {
   return Promise.all([
     databases.events.destroy(),
     databases.strokes.destroy(),
-    databases.pages.destroy()
+    // databases.pages.destroy()
   ]).then(() => {
     return createOrOpenAll();
   });
@@ -61,9 +60,9 @@ databases.dumpToJSON = () => {
     databases.strokes.allDocs({include_docs: true}).then(data => {
       fs.writeFile(dump_folder + timestamp + '_strokes.json', JSON.stringify(data), 'utf8', () => true);
     }),
-    databases.pages.allDocs({include_docs: true}).then(data => {
-      fs.writeFile(dump_folder + timestamp + '_pages.json', JSON.stringify(data), 'utf8', () => true);
-    })
+    // databases.pages.allDocs({include_docs: true}).then(data => {
+    //   fs.writeFile(dump_folder + timestamp + '_pages.json', JSON.stringify(data), 'utf8', () => true);
+    // })
   ]);
 };
 

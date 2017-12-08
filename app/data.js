@@ -9,11 +9,12 @@ const Rx = require('rxjs/Rx');
 const rawEvent$ = require('./ws');
 const db = require('./database');
 
-// ------ WARNING ------
-const CLEAR_ALL_DATA = false;
-// ------ WARNING ------
 
 const DUMP_ALL_DATA = 0;
+
+// ------ WARNING ------
+const CLEAR_ALL_DATA = 0;
+// ------ WARNING ------
 
 
 
@@ -35,7 +36,7 @@ if (DUMP_ALL_DATA) dumpAllData();
 
 // log event data (for debugging)
 db.events.allDocs({include_docs: true}).then(data => {
-  debug("dump events", data);
+  debug("events data", data);
 });
 
 db.strokes.allDocs({include_docs: true}).then(data => {
@@ -114,13 +115,56 @@ db.strokes.info().then(info => {
   
   stroke$.subscribe(stroke => {
     // debug("stroke", stroke);
-    stroke._id = "" + count++;
+    stroke._id = generateStrokeId(stroke.noteId, count++)
     db.strokes.put(stroke).then((res) => {
       debug('stored stroke:', stroke);
     });
   });
 });
 
+
+// Equals function for NoteId object
+// NoteId: { pageNum, ownerId, sectionId, noteId }
+const noteIdEquals = (a, b) => {
+  return a.pageNum === b.pageNum
+      && a.noteId === b.noteId
+      && a.sectionId === b.sectionId
+      && a.ownerId === b.ownerId;
+};
+
+
+function zeroFill( number, width ) {
+  width -= number.toString().length;
+  if ( width > 0 ) {
+    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+  }
+  return number + ""; // always return a string
+}
+
+// Generate an indexable/sortable stroke id
+// will look like: 00-00-00-0000-0000000000000000
+// ownerId-sectionId-noteId-pageNum-strokeIdx
+const generateStrokeId = (noteId, strokeIdx) => {
+  let ni = {
+    ownerId: 0,
+    sectionId: 0,
+    noteId: 0,
+    pageNum: 0
+  };
+  if (noteId) {
+    if (noteId.ownerId) ni.ownerId = noteId.ownerId;
+    if (noteId.sectionId) ni.sectionId = noteId.sectionId;
+    if (noteId.noteId) ni.noteId = noteId.noteId;
+    if (noteId.pageNum) ni.pageNum = noteId.pageNum;
+  }
+  if (!strokeIdx) strokeIdx = 0;
+  
+  return zeroFill(ni.ownerId, 2) 
+  + "-" + zeroFill(ni.sectionId, 2) 
+  + "-" + zeroFill(ni.noteId, 2)
+  + "-" + zeroFill(ni.pageNum, 4)
+  + "-" + zeroFill(strokeIdx, 16)
+};
 
 module.exports = {
   event$: event$,
