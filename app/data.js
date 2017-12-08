@@ -13,19 +13,27 @@ const db = require('./database');
 const CLEAR_ALL_DATA = false;
 // ------ WARNING ------
 
+const DUMP_ALL_DATA = 0;
+
 
 
 const clearAllData = () => {
   return db.clear().then(() => {
     debug('CLEARED DATA');
-    return true;
   });
 };
 if (CLEAR_ALL_DATA) clearAllData();
 
 
+const dumpAllData = () => {
+  return db.dumpToJSON().then(() => {
+    debug("dumped to JSON");
+  });
+};
+if (DUMP_ALL_DATA) dumpAllData();
 
-// dump event data (for debugging)
+
+// log event data (for debugging)
 db.events.allDocs({include_docs: true}).then(data => {
   debug("dump events", data);
 });

@@ -3,17 +3,22 @@
 
 const debug = require('debug')('db');
 const path = require('path');
+const fs = require('fs');
 const PouchDB = require('pouchdb');
 
 const DB_FOLDER = 'db_data';
+const DUMP_FOLDER = 'db_dump_json';
+
+
 
 PouchDB.adapter('worker', require('worker-pouch'));
 PouchDB.debug.disable(); // disable debug output
 
-const folder = path.join(process.cwd(), DB_FOLDER) + "/";
+const db_folder = path.join(process.cwd(), DB_FOLDER) + "/";
+const dump_folder = path.join(process.cwd(), DUMP_FOLDER) + "/";
 
 const createOrOpenDB = (name) => {
-  return new PouchDB(folder + name);
+  return new PouchDB(db_folder + name);
 };
 
 const databases = {};
@@ -34,6 +39,32 @@ databases.clear = () => {
   ]).then(() => {
     return createOrOpenAll();
   });
+};
+
+
+function ensureDirectoryExistence(dirname) {
+  if (fs.existsSync(dirname)) {
+    return true;
+  }
+  return fs.mkdirSync(dirname);
+}
+
+
+databases.dumpToJSON = () => {
+  const timestamp = new Date().toISOString();
+  ensureDirectoryExistence(dump_folder);
+  
+  return Promise.all([
+    databases.events.allDocs({include_docs: true}).then(data => {
+      fs.writeFile(dump_folder + timestamp + '_events.json', JSON.stringify(data), 'utf8', () => true);
+    }),
+    databases.strokes.allDocs({include_docs: true}).then(data => {
+      fs.writeFile(dump_folder + timestamp + '_strokes.json', JSON.stringify(data), 'utf8', () => true);
+    }),
+    databases.pages.allDocs({include_docs: true}).then(data => {
+      fs.writeFile(dump_folder + timestamp + '_pages.json', JSON.stringify(data), 'utf8', () => true);
+    })
+  ]);
 };
 
 module.exports = databases;

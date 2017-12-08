@@ -60,3 +60,4 @@ typings/
 # database data
 db_data/*
 !db_data/.gitkeep
+db_dump_json
