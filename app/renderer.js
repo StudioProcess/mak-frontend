@@ -3,10 +3,6 @@
 // All of the Node.js APIs are available in this process.
 
 
-// const stream = require('./ws');
-// console.log(stream);
-// stream.subscribe(e => console.log(e));
-
 const dh = require('./data'); // data handling
 
 
@@ -14,7 +10,7 @@ const app = require("electron").remote.app;
 const THREE = require('three');
 
 const W = 1280;
-const H = 720;
+const H = 800;
 console.log("Electron", process.versions.electron+",", "Node.js", process.versions.node+",", "Chromium", process.versions.chrome);
 
 // Setup FPS display
@@ -31,6 +27,46 @@ scene.add( camera ); // not needed?
 var renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize( W, H );
 document.body.appendChild( renderer.domElement );
+
+
+
+// Stroke Data i.e. multiple line strips
+// BufferGeometry // Vertex Buffer, Element Buffer, Attributes
+// .addAttribute
+// .setIndex
+// -> need to use line segments to render lines with gaps from ONE buffer in ONE call
+// https://stackoverflow.com/questions/45903837/multiple-strip-lines-in-one-draw-call
+// 
+// LineBasicMaterial
+// LineSegments
+
+const MAX_POINTS = 1000;
+let vertexData = new Float32Array(MAX_POINTS * 2);
+let indexData = new Uint32Array(MAX_POINTS * 2);
+
+// 2d vertex positions
+vertexData.set([
+  -500, 0,
+  -300, 200,
+  -100, 0,
+   100, 0,
+   300, 200,
+   500, 0
+]);
+// each pair of indices defines a line
+indexData.set([
+  0, 1, 1, 2, // 1st stroke 
+  3, 4, 4, 5  // 2nd stroke
+]);
+
+let geometry = new THREE.BufferGeometry();
+let material = new THREE.LineBasicMaterial( {color: 0xffffff, linewidth: 3} );
+geometry.addAttribute( 'position', new THREE.BufferAttribute(vertexData, 2) );
+geometry.setIndex( new THREE.BufferAttribute(indexData, 1) );
+geometry.setDrawRange(0, 8);
+geometry.computeBoundingBox();
+let lines = new THREE.LineSegments( geometry, material );
+scene.add(lines);
 
 
 
