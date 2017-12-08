@@ -9,6 +9,21 @@ const Rx = require('rxjs/Rx');
 const rawEvent$ = require('./ws');
 const db = require('./database');
 
+// ------ WARNING ------
+const CLEAR_ALL_DATA = false;
+// ------ WARNING ------
+
+
+
+const clearAllData = () => {
+  return db.clear().then(() => {
+    debug('CLEARED DATA');
+    return true;
+  });
+};
+if (CLEAR_ALL_DATA) clearAllData();
+
+
 
 // dump event data (for debugging)
 db.events.allDocs({include_docs: true}).then(data => {
@@ -18,6 +33,7 @@ db.events.allDocs({include_docs: true}).then(data => {
 db.strokes.allDocs({include_docs: true}).then(data => {
   debug("dump strokes", data);
 });
+
 
 
 // Directly store all raw pen events
@@ -41,31 +57,6 @@ db.events.info().then(info => {
   });
 });
 
-
-
-// Create Stroke array from event data
-// Stroke: { downTime, upTime, duration, timeDiff, noteID, nodes:[Node] }
-// Node: { x, y, timeDiff, pressure }
-// NoteID: { }
-function strokesFromEvents(eventData) {
-  return eventData.reduce((acc, event) => {
-    
-    if (event.type == 'updown') {
-      if (event.status == 'down') {
-        let timeDiff = acc.length == 0 ? 0 : event.time - acc[acc.length-1].upTime;
-        acc.push({ downTime: event.time, upTime: 0, duration: 0, timeDiff, nodes: [] });
-      } else if (event.status == 'up') {
-        let stroke = acc[acc.length-1];
-        stroke.upTime = event.time;
-        stroke.duration = stroke.upTime - stroke.downTime;
-      }
-    } else if (event.type == 'stroke') {
-      acc[acc.length-1].nodes.push(event.node);
-      // TODO: add absolute time
-    }
-    return acc;
-  }, []);
-}
 
 
 // Transform live event data into stroke stream
@@ -105,6 +96,7 @@ event$.subscribe(event => {
   }
   
 });
+
 
 // Store stroke events
 db.strokes.info().then(info => {
