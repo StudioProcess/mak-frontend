@@ -7,16 +7,15 @@ const debug = require('debug')('ws');
 const Rx = require('rxjs/Rx');
 const wsSubject = new Rx.Subject();
 const wsObservable = Rx.Observable.from(wsSubject);
+const config = require('../config');
 
-const wsURI = 'ws://localhost:8080';
-const reconnectInterval = 3000;
 
 let ws; // websocket object
 let reconnectAttempt = 0;
 
 
 function connect() {
-  ws = new WebSocket(wsURI);
+  ws = new WebSocket(config.WS_URI);
   ws.onopen = onOpen;
   ws.onclose = onClose;
   ws.onmessage = onMessage;
@@ -28,7 +27,7 @@ function reconnect() {
     reconnectAttempt++;
     debug('reconnect attempt ' + reconnectAttempt);
     connect();
-  }, reconnectInterval);
+  }, config.WS_RECONNECT_INTERVAL);
 }
 
 function onOpen(evt) {

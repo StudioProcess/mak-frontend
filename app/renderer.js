@@ -8,9 +8,9 @@ const dh = require('./data'); // data handling
 
 const app = require("electron").remote.app;
 const THREE = require('three');
-
-const W = 1280;
-const H = 800;
+const config = require('../config');
+const W = config.W;
+const H = config.H;
 console.log("Electron", process.versions.electron+",", "Node.js", process.versions.node+",", "Chromium", process.versions.chrome);
 
 // Setup FPS display
@@ -41,9 +41,8 @@ document.body.appendChild( renderer.domElement );
 // LineBasicMaterial
 // LineSegments
 
-const MAX_POINTS = 1000;
-let vertexData = new Float32Array(MAX_POINTS * 2);
-let indexData = new Uint32Array(MAX_POINTS * 2);
+let vertexData = new Float32Array(config.MAX_POINTS * 2);
+let indexData = new Uint32Array(config.MAX_POINTS * 2);
 
 // 2d vertex positions
 vertexData.set([

@@ -5,16 +5,14 @@ const debug = require('debug')('db');
 const path = require('path');
 const fs = require('fs');
 const PouchDB = require('pouchdb');
-
-const DB_FOLDER = 'db_data';
-const DUMP_FOLDER = 'db_dump_json';
+const config = require('../config');
 
 
 PouchDB.adapter('worker', require('worker-pouch'));
 PouchDB.debug.disable(); // disable debug output
 
-const db_folder = path.join(process.cwd(), DB_FOLDER) + "/";
-const dump_folder = path.join(process.cwd(), DUMP_FOLDER) + "/";
+const db_folder = path.join(process.cwd(), config.DB_FOLDER) + "/";
+const dump_folder = path.join(process.cwd(), config.DUMP_FOLDER) + "/";
 
 const createOrOpenDB = (name) => {
   return new PouchDB(db_folder + name);

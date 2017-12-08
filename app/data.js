@@ -8,17 +8,7 @@ const debug = require('debug')('data');
 const Rx = require('rxjs/Rx');
 const rawEvent$ = require('./ws');
 const db = require('./database');
-
-
-const DUMP_ALL_DATA = 0;
-
-// ------ WARNING ------
-const CLEAR_ALL_DATA = 0;
-// ------ WARNING ------
-
-const DEFAULT_OWNER_ID = 28;
-const DEFAULT_SECTION_ID = 3;
-const DEFAULT_NOTE_ID = 24;
+const config = require('../config');
 
 
 
@@ -27,7 +17,7 @@ const clearAllData = () => {
     debug('CLEARED DATA');
   });
 };
-if (CLEAR_ALL_DATA) clearAllData();
+if (config.CLEAR_ALL_DATA) clearAllData();
 
 
 const dumpAllData = () => {
@@ -35,7 +25,7 @@ const dumpAllData = () => {
     debug("dumped to JSON");
   });
 };
-if (DUMP_ALL_DATA) dumpAllData();
+if (config.DUMP_ALL_DATA) dumpAllData();
 
 
 // log event data (for debugging)
@@ -175,9 +165,9 @@ const generateStrokeId = (noteId, strokeIdx) => {
 // Create an NoteId Object for a certain page number using default values
 const createNoteIdForPage = (pageNum) => {
   return {
-    ownerId: DEFAULT_OWNER_ID,
-    sectionId: DEFAULT_SECTION_ID,
-    noteId: DEFAULT_NOTE_ID,
+    ownerId: config.DEFAULT_OWNER_ID,
+    sectionId: config.DEFAULT_SECTION_ID,
+    noteId: config.DEFAULT_NOTE_ID,
     pageNum
   };
 };

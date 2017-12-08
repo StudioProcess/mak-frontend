@@ -1,5 +1,7 @@
 const debug = "*";
 const electron = require('electron')
+const config = require('./config')
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -18,8 +20,8 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1280, 
-    height: 800, 
+    width: config.W, 
+    height: config.H, 
     useContentSize: true
   });
 
