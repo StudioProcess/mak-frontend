@@ -22,7 +22,8 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     width: config.W, 
     height: config.H, 
-    useContentSize: true
+    useContentSize: true,
+    backgroundColor: '#000'
   });
 
   // and load the index.html of the app.
