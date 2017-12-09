@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-packager . --out=build"
   },
   "repository": "https://github.com/StudioProcess/mak-frontend",
   "author": "Studio Process",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "electron": "1.8.2-beta.3"
+    "electron": "1.8.2-beta.3",
+    "electron-packager": "^10.1.0"
   },
   "dependencies": {
     "debug": "^3.1.0",
