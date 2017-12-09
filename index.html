@@ -6,9 +6,19 @@
   <style>
     html, body { margin:0; padding:0; }
     #three_canvas { display:block; width:100vw; height:100vh; }
+    body.is_fullscreen * { cursor: none; }
   </style>
 </head>
 <body>
+  <script>
+    const win = require("electron").remote.getCurrentWindow();
+    win.on('enter-full-screen', () => {
+      document.body.className = "is_fullscreen";
+    });
+    win.on('leave-full-screen', () => {
+      document.body.className = "";
+    });
+  </script>
   <script>
     // You can also require other files to run in this process
     require('./app/renderer.js')
