@@ -76,11 +76,12 @@ function setupMenu() {
     label: app.getName(),
     submenu: [
       { label: 'Fullscreen (Kiosk)',
-        accelerator: 'CmdOrCtrl+F',
+        accelerator: 'CmdOrCtrl+Shift+F',
         click: () => { mainWindow.setKiosk(!mainWindow.isKiosk()); }
       },
-      {type: 'separator'},
-      {role: 'quit'}
+      {role: 'reload', accelerator: 'CmdOrCtrl+Shift+R' },
+      {type: 'separator' },
+      {role: 'quit',  accelerator: 'CmdOrCtrl+Shift+W' }
     ]
   }];
   const menu = electron.Menu.buildFromTemplate(template);
