@@ -73,11 +73,10 @@ scene.add(lines);
  */
 
 let pageData;
-let dataUpdated;
+let nodeData = [];
+let dataNeedsUpdate;
 
-function update(time) {
-  if (!dataUpdated) return;
-  dataUpdated = false;
+function updateData() {
   // vertex buffer attribute is here: geometry.attributes.position
   // index buffer attribute is here: geometry.index
   // properties: array, needsUpdate, updateRange()
@@ -110,7 +109,29 @@ function update(time) {
   geometry.attributes.position.needsUpdate = true;
   geometry.index.needsUpdate = true;
   geometry.setDrawRange(0, n);
+}
 
+
+let animationStart;
+let firstNodeTime;
+let currentIdx = 0;
+
+function update(time) {
+  if (dataNeedsUpdate) {
+    updateData();
+    dataNeedsUpdate = false;
+    animationStart = time;
+    firstNodeTime = nodeData[0].time;
+    currentIdx = 0;
+  }
+  let animationTime = time - animationStart;
+  let lookupTime = firstNodeTime + animationTime;
+  while (currentIdx < nodeData.length 
+      && nodeData[currentIdx].time < lookupTime) {
+    currentIdx++;
+  }
+  // currentIdx += 5; // looks much better than stored values
+  geometry.setDrawRange(0, currentIdx);
 }
 
 let prevTime = 0.0;
@@ -119,13 +140,12 @@ let elapsedTime = 0.0;
 function animate(time) {
   elapsedTime = time-prevTime;
   prevTime = time;
-  // console.log(elapsedTime)
-  // 
+  
   stats.begin();
   update(time);
-  renderer.render( scene, camera );
   // square.rotation.z += 0.01;
   // line.rotation.z -= 0.01;
+  renderer.render( scene, camera );
   stats.end();
   
   requestAnimationFrame( animate );
@@ -135,13 +155,11 @@ animate();
 
 // load some data
 data.getPage(4).then(data => {
-  // debug("page 4 data", data);
-  // debug(geometry.attributes.position);
-  // debug(geometry.index);
-  let n = data.reduce((acc, stroke) => {
-    return acc += stroke.nodes.length;
-  }, 0);
-  debug('page 4 nodes:', n);
+  let nodes = data.reduce((acc, stroke) => acc.concat(stroke.nodes), []);
+  
+  // debug('page 4 nodes:', nodes.length);
+  // debug('page 4 nodes', nodes);
   pageData = data;
-  dataUpdated = true;
+  nodeData = nodes;
+  dataNeedsUpdate = true;
 });
