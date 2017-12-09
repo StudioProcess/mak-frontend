@@ -186,11 +186,18 @@ const getPage = (n) => {
   });
 };
 
-getPage(4).then(data => {
-  debug("page 4 data", data);
-});
+// getPage(4).then(data => {
+//   debug("page 4 data", data);
+// });
+
+// // Page: [Stroke]
+// function gpuDataFromPage(page) {
+// 
+// }
+
 
 module.exports = {
-  event$: event$,
-  stroke$: Rx.Observable.from(stroke$)
+  event$,
+  stroke$: Rx.Observable.from(stroke$),
+  getPage,
 }

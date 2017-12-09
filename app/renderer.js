@@ -2,13 +2,11 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-
-const dh = require('./data'); // data handling
-
-
-const app = require("electron").remote.app;
+const app = require('electron').remote.app;
+const debug = require('debug')('renderer');
 const THREE = require('three');
 const config = require('../config');
+const data = require('./data'); // data handling
 const W = config.W;
 const H = config.H;
 console.log("Electron", process.versions.electron+",", "Node.js", process.versions.node+",", "Chromium", process.versions.chrome);
@@ -64,7 +62,7 @@ let material = new THREE.LineBasicMaterial( {color: 0xffffff, linewidth: 3} );
 geometry.addAttribute( 'position', new THREE.BufferAttribute(vertexData, 2) );
 geometry.setIndex( new THREE.BufferAttribute(indexData, 1) );
 geometry.setDrawRange(0, 8);
-geometry.computeBoundingBox();
+// geometry.computeBoundingBox();
 let lines = new THREE.LineSegments( geometry, material );
 scene.add(lines);
 
@@ -73,6 +71,47 @@ scene.add(lines);
 /* 
   RENDER LOOP
  */
+
+let pageData;
+let dataUpdated;
+
+function update(time) {
+  if (!dataUpdated) return;
+  dataUpdated = false;
+  // vertex buffer attribute is here: geometry.attributes.position
+  // index buffer attribute is here: geometry.index
+  // properties: array, needsUpdate, updateRange()
+
+  let positions = geometry.attributes.position.array;
+  let indices = geometry.index.array;
+  
+  let n = 0; // current node
+  let n_stroke = 0; // current node within the current stroke
+  
+  let iv = 0; // current index into vertex buffer
+  let ie = 0; // current index into index (i.e. element) buffer
+  
+  for (let stroke of pageData) {
+    if (n >= config.MAX_POINTS) break;
+    for (let node of stroke.nodes) {
+      if (n >= config.MAX_POINTS) break;
+      positions.set( [-config.W/2 + (node.x-5) * 10, config.H/2 - (node.y-5) * 10], iv );
+      iv += 2;
+      if (n_stroke > 0) {
+        indices.set( [n-1, n], ie );
+        ie += 2;
+      }
+      n_stroke++;
+      n++;
+    }
+    n_stroke = 0;
+  }
+  debug('uploaded nodes:', n);
+  geometry.attributes.position.needsUpdate = true;
+  geometry.index.needsUpdate = true;
+  geometry.setDrawRange(0, n);
+
+}
 
 let prevTime = 0.0;
 let elapsedTime = 0.0;
@@ -83,6 +122,7 @@ function animate(time) {
   // console.log(elapsedTime)
   // 
   stats.begin();
+  update(time);
   renderer.render( scene, camera );
   // square.rotation.z += 0.01;
   // line.rotation.z -= 0.01;
@@ -91,3 +131,17 @@ function animate(time) {
   requestAnimationFrame( animate );
 }
 animate();
+
+
+// load some data
+data.getPage(4).then(data => {
+  // debug("page 4 data", data);
+  // debug(geometry.attributes.position);
+  // debug(geometry.index);
+  let n = data.reduce((acc, stroke) => {
+    return acc += stroke.nodes.length;
+  }, 0);
+  debug('page 4 nodes:', n);
+  pageData = data;
+  dataUpdated = true;
+});
