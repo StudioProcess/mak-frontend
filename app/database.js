@@ -3,6 +3,7 @@
 
 const debug = require('debug')('db');
 const path = require('path');
+const app = require('electron').remote.app;
 const fs = require('fs');
 const PouchDB = require('pouchdb');
 const config = require('../config');
@@ -11,8 +12,11 @@ const config = require('../config');
 PouchDB.adapter('worker', require('worker-pouch'));
 PouchDB.debug.disable(); // disable debug output
 
-const db_folder = path.join(process.cwd(), config.DB_FOLDER) + "/";
-const dump_folder = path.join(process.cwd(), config.DUMP_FOLDER) + "/";
+const db_folder = path.join(app.getAppPath(), config.DB_FOLDER) + "/";
+const dump_folder = path.join(app.getAppPath(), config.DUMP_FOLDER) + "/";
+debug('app path', );
+debug('db_folder', db_folder);
+debug('dump_folder', dump_folder);
 
 const createOrOpenDB = (name) => {
   return new PouchDB(db_folder + name);
