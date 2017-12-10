@@ -79,6 +79,9 @@ function updateData() {
 
   let positions = geometry.attributes.position.array;
   let indices = geometry.index.array;
+  // clear arrays
+  positions.fill(0);
+  indices.fill(0);
   
   let n = 0; // current node
   let n_stroke = 0; // current node within the current stroke
