@@ -1,6 +1,6 @@
 module.exports = {
   W: 1280,
-  H: 800,
+  H: 720,
   
   WS_URI: 'ws://localhost:8080',
   WS_RECONNECT_INTERVAL: 10000,
