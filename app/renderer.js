@@ -110,7 +110,7 @@ function updateData() {
 
 let animationStart;
 let firstNodeTime;
-let currentIdx = 0;
+let currentIdx = 0; // current dot index
 let animationSpeed = 200; // in nodes per second
 
 function update(time) {
@@ -131,7 +131,7 @@ function update(time) {
   // Fixed speed animation looks much better than stored values:
   currentIdx = animationTime/1000 * animationSpeed;
   if (currentIdx >= nodeData.length) currentIdx = nodeData.length; // don't draw more than neccessary
-  geometry.setDrawRange(0, currentIdx);
+  geometry.setDrawRange(0, currentIdx*2); // TODO: need correct length, respecting stroke gaps
 }
 
 let prevTime = 0.0;
@@ -157,19 +157,21 @@ animate();
 /* 
   LOAD PAGE DATA
  */
-let currentPage = 4;
+let currentPage = 2;
 
 function loadPage(n) {
   if (n < 1) n = 1; // 1 is the first page number
   debug('loading page', n);
   data.getPage(n).then(data => {
-    debug("page data", data);
     // if (data.length == 0) return; // nothing to see here
     let nodes = data.reduce((acc, stroke) => acc.concat(stroke.nodes), []);
     pageData = data;
     nodeData = nodes;
     dataNeedsUpdate = true;
     currentPage = n;
+    
+    debug("strokes", pageData.length);
+    debug("nodes", nodeData.length);
   });
 }
 

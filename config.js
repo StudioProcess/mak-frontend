@@ -8,7 +8,7 @@ module.exports = {
   DB_FOLDER: 'db_data',
   DUMP_FOLDER: 'db_dump_json',
   
-  MAX_POINTS: 1000,
+  MAX_POINTS: 10000,
   
   DEFAULT_OWNER_ID: 28,
   DEFAULT_SECTION_ID: 3,
