@@ -60,6 +60,7 @@ geometry.setIndex( new THREE.BufferAttribute(indexData, 1) );
 geometry.setDrawRange(0, 8);
 // geometry.computeBoundingBox();
 let lines = new THREE.LineSegments( geometry, material );
+lines.frustumCulled = false;
 scene.add(lines);
 
 
