@@ -115,22 +115,26 @@ function updateData() {
 let animationStart;
 let firstNodeTime;
 let currentIdx = 0;
+let animationSpeed = 200; // in nodes per second
 
 function update(time) {
   if (dataNeedsUpdate) {
     updateData();
     dataNeedsUpdate = false;
     animationStart = time;
-    firstNodeTime = nodeData[0].time;
+    firstNodeTime = nodeData.length > 0 ? nodeData[0].time : 0;
     currentIdx = 0;
   }
   let animationTime = time - animationStart;
-  let lookupTime = firstNodeTime + animationTime;
-  while (currentIdx < nodeData.length 
-      && nodeData[currentIdx].time < lookupTime) {
-    currentIdx++;
-  }
-  // currentIdx += 5; // looks much better than stored values
+  // Animation based on stored values
+  // let lookupTime = firstNodeTime + animationTime;
+  // while (currentIdx < nodeData.length 
+  //     && nodeData[currentIdx].time < lookupTime) {
+  //   currentIdx++;
+  // }
+  // Fixed speed animation looks much better than stored values:
+  currentIdx = animationTime/1000 * animationSpeed;
+  if (currentIdx >= nodeData.length) currentIdx = nodeData.length; // don't draw more than neccessary
   geometry.setDrawRange(0, currentIdx);
 }
 
@@ -153,13 +157,33 @@ function animate(time) {
 animate();
 
 
-// load some data
-data.getPage(4).then(data => {
-  let nodes = data.reduce((acc, stroke) => acc.concat(stroke.nodes), []);
-  
-  // debug('page 4 nodes:', nodes.length);
-  // debug('page 4 nodes', nodes);
-  pageData = data;
-  nodeData = nodes;
-  dataNeedsUpdate = true;
-});
+
+/* 
+  LOAD PAGE DATA
+ */
+let currentPage = 4;
+
+function loadPage(n) {
+  if (n < 1) n = 1; // 1 is the first page number
+  debug('loading page', n);
+  data.getPage(n).then(data => {
+    debug("page data", data);
+    // if (data.length == 0) return; // nothing to see here
+    let nodes = data.reduce((acc, stroke) => acc.concat(stroke.nodes), []);
+    pageData = data;
+    nodeData = nodes;
+    dataNeedsUpdate = true;
+    currentPage = n;
+  });
+}
+
+loadPage(currentPage);
+
+window.addEventListener('keyup', e => {
+  if (e.keyCode == 37) { // LEFT ARROW
+    loadPage(currentPage - 1);
+  } 
+  else if (e.keyCode == 39) { // RIGHT ARROW
+    loadPage(currentPage + 1);
+  }
+}, true);
