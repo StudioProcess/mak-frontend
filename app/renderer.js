@@ -7,15 +7,11 @@ const debug = require('debug')('renderer');
 const THREE = require('three');
 const config = require('../config');
 const data = require('./data'); // data handling
+const stats = require('./stats');
 const W = config.W;
 const H = config.H;
 console.log("Electron", process.versions.electron+",", "Node.js", process.versions.node+",", "Chromium", process.versions.chrome);
 
-// Setup FPS display
-const Stats = require('stats.js');
-var stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom );
 
 // Renderer
 var scene = new THREE.Scene();
