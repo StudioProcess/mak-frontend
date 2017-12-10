@@ -30,6 +30,6 @@ window.addEventListener('keyup', e => {
   }
 }, true);
 
-debug(stats);
+// debug(stats);
 
 module.exports = stats;

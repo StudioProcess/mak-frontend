@@ -36,7 +36,7 @@ function onOpen(evt) {
 }
 
 function onClose(evt) {
-  debug('connection closed', evt);
+  // debug('connection closed', evt);
   reconnect();
 }
 
