@@ -69,10 +69,33 @@ const noisePass = new THREE.ShaderPass({
   uniforms: { "tDiffuse": { value: null }, "amount":  { value: 0.1 }, "time" : { value: 0.0 } }
 });
 
-noisePass.renderToScreen = true;
-composer.addPass(noisePass);
+const dtPass = new THREE.ShaderPass({
+  vertexShader: shaders['dt.vert'],
+  fragmentShader: shaders['dt.frag'],
+  uniforms: { 
+    "tDiffuse": { value: null }, 
+    "screenSize": { value: new THREE.Vector2(W, H) },
+    "k":  { value: 1.0 } 
+  }
+});
+// dtPass.renderToScreen = true;
+// composer.addPass(dtPass);
 
+const hillshadePass = new THREE.ShaderPass({
+  vertexShader: shaders['copy.vert'],
+  fragmentShader: shaders['hillshade.frag'],
+  uniforms: { 
+    "tDiffuse": { value: null }, 
+    "texOffset": { value: new THREE.Vector2(1.0/W, 1.0/H) },
+    "azimuth": { value: 315 },
+    "altitude": { value: 45 },
+    "z_factor": { value: 1.0 },
+    "cellsize": { value: 5.0 }
+  }
+});
 
+hillshadePass.renderToScreen = true;
+composer.addPass(hillshadePass);
 
 
 

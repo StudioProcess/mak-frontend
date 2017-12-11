@@ -9,7 +9,9 @@ function readShaderText(filename) {
 const files = [
   'basic.vert', 'basic.frag', 
   'copy.vert', 'copy.frag',
-  'noise.frag'
+  'noise.frag',
+  'dt.vert', 'dt.frag',
+  'hillshade.frag'
 ];
 
 for (filename of files) {
