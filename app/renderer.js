@@ -10,8 +10,7 @@ require('three/examples/js/postprocessing/EffectComposer');
 require('three/examples/js/postprocessing/RenderPass');
 require('three/examples/js/postprocessing/ShaderPass');
 require('three/examples/js/shaders/CopyShader');
-const shaders = require('./shaders');
-debug(shaders);
+const shader = require('./loadShader');
 // debug(THREE);
 
 const config = require('../config');
