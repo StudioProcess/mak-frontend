@@ -10,6 +10,8 @@ require('three/examples/js/postprocessing/EffectComposer');
 require('three/examples/js/postprocessing/RenderPass');
 require('three/examples/js/postprocessing/ShaderPass');
 require('three/examples/js/shaders/CopyShader');
+const shaders = require('./shaders');
+debug(shaders);
 // debug(THREE);
 
 const config = require('../config');
@@ -58,9 +60,18 @@ scene.add(lines);
 // Postprocessing Setup
 const composer = new THREE.EffectComposer(renderer);
 const renderPass = new THREE.RenderPass(scene, camera);
-renderPass.renderToScreen = true;
+// renderPass.renderToScreen = true;
 composer.addPass(renderPass);
-debug(composer, renderPass);
+
+const noisePass = new THREE.ShaderPass({
+  vertexShader: shaders['copy.vert'],
+  fragmentShader: shaders['noise.frag'],
+  uniforms: { "tDiffuse": { value: null }, "amount":  { value: 0.1 }, "time" : { value: 0.0 } }
+});
+
+noisePass.renderToScreen = true;
+composer.addPass(noisePass);
+
 
 
 
@@ -147,6 +158,7 @@ function animate(time) {
   
   stats.begin();
   update(time);
+  noisePass.uniforms.time.value = time;
   // renderer.render( scene, camera );
   composer.render(time);
   stats.end();
