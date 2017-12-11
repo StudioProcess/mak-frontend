@@ -5,6 +5,13 @@
 const app = require('electron').remote.app;
 const debug = require('debug')('renderer');
 const THREE = require('three');
+window.THREE = THREE; // needed for postprocessing scripts below
+require('three/examples/js/postprocessing/EffectComposer');
+require('three/examples/js/postprocessing/RenderPass');
+require('three/examples/js/postprocessing/ShaderPass');
+require('three/examples/js/shaders/CopyShader');
+// debug(THREE);
+
 const config = require('../config');
 const data = require('./data'); // data handling
 const stats = require('./stats');
@@ -35,24 +42,8 @@ document.body.appendChild( renderer.domElement );
 // LineBasicMaterial
 // LineSegments
 
-let vertexData = new Float32Array(config.MAX_POINTS * 2);
-let indexData = new Uint32Array(config.MAX_POINTS * 2);
-
-// 2d vertex positions
-vertexData.set([
-  -500, 0,
-  -300, 200,
-  -100, 0,
-   100, 0,
-   300, 200,
-   500, 0
-]);
-// each pair of indices defines a line
-indexData.set([
-  0, 1, 1, 2, // 1st stroke 
-  3, 4, 4, 5  // 2nd stroke
-]);
-
+let vertexData = new Float32Array(config.MAX_POINTS * 2); // 2d vertex positions
+let indexData = new Uint32Array(config.MAX_POINTS * 2); // each pair of indices defines a line (GL_LINES)
 let geometry = new THREE.BufferGeometry();
 let material = new THREE.LineBasicMaterial( {color: 0xffffff, linewidth: 3} );
 geometry.addAttribute( 'position', new THREE.BufferAttribute(vertexData, 2) );
@@ -60,8 +51,17 @@ geometry.setIndex( new THREE.BufferAttribute(indexData, 1) );
 geometry.setDrawRange(0, 8);
 // geometry.computeBoundingBox();
 let lines = new THREE.LineSegments( geometry, material );
-lines.frustumCulled = false;
+lines.frustumCulled = false; // Prevents bounding sphere calculation error
 scene.add(lines);
+
+
+// Postprocessing Setup
+const composer = new THREE.EffectComposer(renderer);
+const renderPass = new THREE.RenderPass(scene, camera);
+renderPass.renderToScreen = true;
+composer.addPass(renderPass);
+debug(composer, renderPass);
+
 
 
 
@@ -147,9 +147,8 @@ function animate(time) {
   
   stats.begin();
   update(time);
-  // square.rotation.z += 0.01;
-  // line.rotation.z -= 0.01;
-  renderer.render( scene, camera );
+  // renderer.render( scene, camera );
+  composer.render(time);
   stats.end();
   
   requestAnimationFrame( animate );
@@ -161,7 +160,7 @@ animate();
 /* 
   LOAD PAGE DATA
  */
-let currentPage = 2;
+let currentPage = 5;
 
 function loadPage(n) {
   if (n < 1) n = 1; // 1 is the first page number
