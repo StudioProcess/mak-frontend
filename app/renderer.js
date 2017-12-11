@@ -59,42 +59,44 @@ scene.add(lines);
 // Postprocessing Setup
 const composer = new THREE.EffectComposer(renderer);
 const renderPass = new THREE.RenderPass(scene, camera);
-// renderPass.renderToScreen = true;
 composer.addPass(renderPass);
+// renderPass.renderToScreen = true;
 
 const noisePass = new THREE.ShaderPass({
-  vertexShader: shaders['copy.vert'],
-  fragmentShader: shaders['noise.frag'],
+  vertexShader: shader('copy.vert'),
+  fragmentShader: shader('noise.frag'),
   uniforms: { "tDiffuse": { value: null }, "amount":  { value: 0.1 }, "time" : { value: 0.0 } }
 });
 
 const dtPass = new THREE.ShaderPass({
-  vertexShader: shaders['dt.vert'],
-  fragmentShader: shaders['dt.frag'],
+  vertexShader: shader('dt.vert'),
+  fragmentShader: shader('dt.frag'),
   uniforms: { 
     "tDiffuse": { value: null }, 
     "screenSize": { value: new THREE.Vector2(W, H) },
     "k":  { value: 1.0 } 
   }
 });
-// dtPass.renderToScreen = true;
-// composer.addPass(dtPass);
 
 const hillshadePass = new THREE.ShaderPass({
-  vertexShader: shaders['copy.vert'],
-  fragmentShader: shaders['hillshade.frag'],
+  vertexShader: shader('copy.vert'),
+  fragmentShader: shader('hillshade.frag'),
   uniforms: { 
     "tDiffuse": { value: null }, 
     "texOffset": { value: new THREE.Vector2(1.0/W, 1.0/H) },
     "azimuth": { value: 315 },
     "altitude": { value: 45 },
-    "z_factor": { value: 1.0 },
-    "cellsize": { value: 5.0 }
+    "cellsize": { value: 5.0 },
+    "z_factor": { value: 10.0 }
   }
 });
 
-hillshadePass.renderToScreen = true;
+// composer.addPass(dtPass);
 composer.addPass(hillshadePass);
+composer.addPass(noisePass);
+// dtPass.renderToScreen = true;
+// hillshadePass.renderToScreen = true;
+noisePass.renderToScreen = true;
 
 
 
