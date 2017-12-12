@@ -11,15 +11,27 @@ uniform sampler2D tDiffuse;
 uniform vec2 texOffset; // texture coordinate offset between fragments
 uniform float k;
 
+// vec4 pickBetter(vec4 n, vec2 offset, vec4 previousBest) {
+//   if (n.z < INF) {
+//     n += vec4(offset, 0.0, 0.0);
+//     n.z += 2.0 * n.x * offset.x 
+//         + offset.x * offset.x
+//         + 2.0 * n.y * offset.y
+//         + offset.y * offset.y;
+//   }
+//   if (n.z < previousBest.z) return n;
+//   return previousBest;
+// }
+
 vec4 pickBetter(vec4 n, vec2 offset, vec4 previousBest) {
-  if (n.z < INF) {
-    n += vec4(offset, 0.0, 0.0);
-    n.z += 2.0 * n.x * offset.x 
-        + offset.x * offset.x
-        + 2.0 * n.y * offset.y
-        + offset.y * offset.y;
+  // if (n.x >= INF || n.y >= INF) return previousBest;
+  vec4 candidate = n;
+  if (n.x < INF && n.y < INF) {
+    candidate = candidate + vec4(offset, 0.0, 0.0);
   }
-  if (n.z < previousBest.z) return n;
+  float previousBestDist = distance(previousBest.xy, vec2(0.0));
+  float candidateDist = distance(candidate.xy, vec2(0.0));
+  if (candidateDist < previousBestDist) return candidate;
   return previousBest;
 } 
 
@@ -39,14 +51,15 @@ void main() {
   vec4 n8 = texture2D( tDiffuse, vCoord78.pq );
   
   // TODO: select best neighbor
-  vec4 best = pickBetter(n0, vec2(-k, -k), n4);
-  best = pickBetter(n1, vec2( 0.0, -k), best);
-  best = pickBetter(n2, vec2( k, -k), best);
-  best = pickBetter(n3, vec2(-k,  0.0), best);
-  best = pickBetter(n5, vec2( k,  0.0), best);
-  best = pickBetter(n6, vec2(-k,  k), best);
-  best = pickBetter(n7, vec2( 0.0,  k), best);
-  best = pickBetter(n8, vec2( k,  k), best);
+  vec4 best = n4;
+  if (vCoord01.s > 0. && vCoord01.t > 0.) best = pickBetter(n0, vec2(-k, -k), best);
+  if (vCoord01.q > 0.) best = pickBetter(n1, vec2( 0.0, -k), best);
+  if (vCoord23.s < 1. && vCoord23.t > 0.) best = pickBetter(n2, vec2( k, -k), best);
+  if (vCoord23.p > 0.) best = pickBetter(n3, vec2(-k,  0.0), best);
+  if (vCoord56.s < 1.) best = pickBetter(n5, vec2( k,  0.0), best);
+  if (vCoord56.p > 0. && vCoord56.q < 1.) best = pickBetter(n6, vec2(-k,  k), best);
+  if (vCoord78.t < 1.) best = pickBetter(n7, vec2( 0.0,  k), best);
+  if (vCoord78.p < 1. && vCoord78.q < 1.) best = pickBetter(n8, vec2( k,  k), best);
   
   gl_FragColor = best;
   

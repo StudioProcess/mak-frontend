@@ -87,15 +87,15 @@ const hillshadePass = new THREE.ShaderPass({
 });
 
 const dtPass = new DistanceTransformPass(THREE, renderer);
-dtPass.finalPass.uniforms.maxDist.value = 50;
+dtPass.finalPass.uniforms.maxDist.value = 5;
 composer.addPass(dtPass);
-dtPass.renderToScreen = true;
-// 
-// composer.addPass(hillshadePass);
+// dtPass.renderToScreen = true;
+
+composer.addPass(hillshadePass);
 // hillshadePass.renderToScreen = true;
 
-// composer.addPass(noisePass);
-// noisePass.renderToScreen = true;
+composer.addPass(noisePass);
+noisePass.renderToScreen = true;
 
 
 
@@ -195,8 +195,9 @@ function animate(time) {
   stats.begin();
   update(time);
   noisePass.uniforms.time.value = time;
-  hillshadePass.uniforms.azimuth.value += 0.25;
-  
+  hillshadePass.uniforms.azimuth.value += 0.33;
+    // hillshadePass.uniforms.altitude.value += 0.33;
+    
   // altitude = (altitude + 0.5) % 360;
   // hillshadePass.uniforms.altitude.value = altitude;
   // dtPass.finalPass.uniforms.maxDist.value -= 0.5;

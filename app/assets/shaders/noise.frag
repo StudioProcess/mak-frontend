@@ -11,6 +11,6 @@ float rand(vec2 co){
 void main() {
   
   vec4 texel = texture2D( tDiffuse, vUv );
-  gl_FragColor = texel * (1.0 - amount) + rand(vUv * time) * amount;
+  gl_FragColor = texel * (1.0 - amount) + rand(vUv) * amount;
   
 }

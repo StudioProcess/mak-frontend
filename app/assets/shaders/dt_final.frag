@@ -16,9 +16,12 @@ void main() {
   float maxDistSq = maxDist * maxDist;
   
   vec3 distVector = texture2D( tDiffuse, vUv ).xyz; // (dx, dy, squared dist)
-  float dist = min(distVector.z, maxDistSq); // clamp at maxDistSq
   
-  gl_FragColor = mix(minColor, maxColor, dist/maxDistSq);
+  // float distSq = min(distVector.z, maxDistSq); // clamp at maxDistSq
+  // gl_FragColor = mix(minColor, maxColor, distSq/maxDistSq);
+  
+  float dist = distance(distVector.xy, vec2(0.));
+  gl_FragColor = mix(minColor, maxColor, dist/maxDist);
   
   // if (dist < 999.) gl_FragColor = minColor;
   // else gl_FragColor = maxColor;
