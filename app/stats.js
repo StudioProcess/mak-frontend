@@ -6,9 +6,6 @@ const win = require("electron").remote.getCurrentWindow();
 const stats = new Stats();
 let panel = 0;
 
-stats.showPanel( panel ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom );
-
 stats.nextPanel = function() {
   stats.showPanel( ++panel );
 }
@@ -39,6 +36,10 @@ win.on('enter-full-screen', () => {
 win.on('leave-full-screen', () => {
   stats.show();
 });
+
+stats.showPanel( panel ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.dom );
+if (win.isFullScreen()) stats.hide();
 
 // debug(stats);
 

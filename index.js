@@ -18,13 +18,14 @@ process.env['DEBUG'] = debug;
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-function createWindow () {
+function createWindow (fullscreen) {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: config.W, 
     height: config.H, 
     useContentSize: true,
-    backgroundColor: '#000'
+    backgroundColor: '#000',
+    kiosk: fullscreen
   });
 
   // and load the index.html of the app.
@@ -35,7 +36,7 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  if (isDev) mainWindow.webContents.openDevTools()
+  if (isDev && !fullscreen) mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -50,7 +51,11 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
-  createWindow();
+  if (config.LAUNCH_FULLSCREEN || !isDev) {
+    createWindow(true); // true for fullscreen
+  } else {
+    createWindow();
+  }
   setupMenu();
 })
 
