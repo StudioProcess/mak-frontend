@@ -1,6 +1,8 @@
 // Setup FPS display
 const debug = require('debug')('stats');
 const Stats = require('stats.js');
+const win = require("electron").remote.getCurrentWindow();
+
 const stats = new Stats();
 let panel = 0;
 
@@ -29,6 +31,14 @@ window.addEventListener('keyup', e => {
     stats.toggle();
   }
 }, true);
+
+win.on('enter-full-screen', () => {
+  stats.hide();
+});
+
+win.on('leave-full-screen', () => {
+  stats.show();
+});
 
 // debug(stats);
 
