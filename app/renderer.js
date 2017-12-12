@@ -27,8 +27,10 @@ var scene = new THREE.Scene();
 var camera = new THREE.OrthographicCamera( -W/2, W/2, H/2, -H/2, 1, 1000 );
 camera.position.z = 1; // need to move the camera outward (distance doesn't matter)
 scene.add( camera ); // not needed?
-var renderer = new THREE.WebGLRenderer({antialias: true});
+var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( W, H, false ); // false means don't set explicit px styles
+renderer.setFaceCulling(THREE.CullFaceNone);
+renderer.context.disable(renderer.context.DEPTH_TEST); // try it, but doesn't seem to work this way
 renderer.domElement.id = "three_canvas";
 document.body.appendChild( renderer.domElement );
 
@@ -47,7 +49,7 @@ document.body.appendChild( renderer.domElement );
 let vertexData = new Float32Array(config.MAX_POINTS * 2); // 2d vertex positions
 let indexData = new Uint32Array(config.MAX_POINTS * 2); // each pair of indices defines a line (GL_LINES)
 let geometry = new THREE.BufferGeometry();
-let material = new THREE.LineBasicMaterial( {color: 0xffffff, linewidth: 3} );
+let material = new THREE.LineBasicMaterial( {color: 0xffffff, depthTest:false } );
 geometry.addAttribute( 'position', new THREE.BufferAttribute(vertexData, 2) );
 geometry.setIndex( new THREE.BufferAttribute(indexData, 1) );
 geometry.setDrawRange(0, 8);
@@ -73,6 +75,9 @@ const noisePass = new THREE.ShaderPass({
     "amount":  { value: 0.1 }
   }
 });
+noisePass.material.depthTest = false;
+// noisePass.material.depthWrite = false;
+debug('noisePass', noisePass.material);
 
 const hillshadePass = new THREE.ShaderPass({
   vertexShader: shader('copy.vert'),
@@ -86,6 +91,8 @@ const hillshadePass = new THREE.ShaderPass({
     "z_factor": { value: 160.0 }
   }
 });
+hillshadePass.material.depthTest = false;
+debug('hillshadePass', hillshadePass.material);
 
 const dtPass = new DistanceTransformPass(THREE, renderer);
 dtPass.finalPass.uniforms.maxDist.value = 5;
@@ -189,14 +196,13 @@ function update(time) {
   geometry.setDrawRange(0, currentIdx*2); // TODO: need correct length, respecting stroke gaps
 }
 
-let prevTime = 0.0;
-let elapsedTime = 0.0;
+// let prevTime = 0.0;
+// let elapsedTime = 0.0;
 
-// let altitude = 45;
 function animate(time) {
   stats.begin();
-  elapsedTime = time-prevTime;
-  prevTime = time;
+  // elapsedTime = time-prevTime;
+  // prevTime = time;
 
   update(time);
   noisePass.uniforms.time.value = time;
@@ -208,6 +214,9 @@ function animate(time) {
   // dtPass.finalPass.uniforms.maxDist.value -= 0.5;
   // renderer.render( scene, camera );
   composer.render(time);
+  
+  // let dep = renderer.context.getParameter(renderer.context.DEPTH_TEST);
+  // debug("depth test", dep);
   
   stats.end();
   requestAnimationFrame( animate );
