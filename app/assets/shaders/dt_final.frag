@@ -3,8 +3,8 @@
 varying vec2 vUv;
 
 uniform sampler2D tDiffuse; // source rendertarget
+uniform float maxDist;
 
-float maxDist = 55.0;
 vec4 minColor = vec4( 1.0 ); // color for distance 0
 vec4 maxColor = vec4( vec3(0.0), 1.0 ); // color for maxDist and higher
 // TESTING

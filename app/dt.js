@@ -35,10 +35,14 @@ class DistanceTransformPass {
     });
     this.initPass.needsSwap = false;
     
+    // this.maxDist = 30.0;
     this.finalPass = new THREE.ShaderPass({
       vertexShader: shader('copy.vert'),
       fragmentShader: shader('dt_final.frag'),
-      uniforms: { "tDiffuse": { value: null } }
+      uniforms: { 
+        "tDiffuse": { value: null },
+        "maxDist": { value: 5.0 }
+      }
     });
     
     this.jfaPass = new THREE.ShaderPass({

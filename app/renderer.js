@@ -66,7 +66,11 @@ composer.addPass(renderPass);
 const noisePass = new THREE.ShaderPass({
   vertexShader: shader('copy.vert'),
   fragmentShader: shader('noise.frag'),
-  uniforms: { "tDiffuse": { value: null }, "amount":  { value: 0.1 }, "time" : { value: 0.0 } }
+  uniforms: { 
+    "tDiffuse": { value: null },
+    "time" : { value: 0.0 },
+    "amount":  { value: 0.1 }
+  } 
 });
 
 const hillshadePass = new THREE.ShaderPass({
@@ -75,23 +79,26 @@ const hillshadePass = new THREE.ShaderPass({
   uniforms: { 
     "tDiffuse": { value: null }, 
     "texOffset": { value: new THREE.Vector2(1.0/W, 1.0/H) },
-    "azimuth": { value: 315 },
+    "azimuth": { value: 119 },
     "altitude": { value: 45 },
-    "cellsize": { value: 5.0 },
-    "z_factor": { value: 10.0 }
+    "cellsize": { value: 1.0 },
+    "z_factor": { value: 160.0 }
   }
 });
 
 const dtPass = new DistanceTransformPass(THREE, renderer);
+dtPass.finalPass.uniforms.maxDist.value = 50;
 composer.addPass(dtPass);
 dtPass.renderToScreen = true;
 // 
 // composer.addPass(hillshadePass);
-// composer.addPass(noisePass);
-
-
 // hillshadePass.renderToScreen = true;
+
+// composer.addPass(noisePass);
 // noisePass.renderToScreen = true;
+
+
+
 
 
 // const finalPass = new THREE.ShaderPass({
@@ -180,6 +187,7 @@ function update(time) {
 let prevTime = 0.0;
 let elapsedTime = 0.0;
 
+// let altitude = 45;
 function animate(time) {
   elapsedTime = time-prevTime;
   prevTime = time;
@@ -187,6 +195,11 @@ function animate(time) {
   stats.begin();
   update(time);
   noisePass.uniforms.time.value = time;
+  hillshadePass.uniforms.azimuth.value += 0.25;
+  
+  // altitude = (altitude + 0.5) % 360;
+  // hillshadePass.uniforms.altitude.value = altitude;
+  // dtPass.finalPass.uniforms.maxDist.value -= 0.5;
   // renderer.render( scene, camera );
   composer.render(time);
   stats.end();
