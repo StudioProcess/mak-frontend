@@ -17,8 +17,8 @@ const DistanceTransformPass = require('./dt');
 const config = require('../config');
 const data = require('./data'); // data handling
 const stats = require('./stats');
-const W = config.W;
-const H = config.H;
+const W = config.W * config.RENDER_SCALE;
+const H = config.H * config.RENDER_SCALE;;
 console.log("Electron", process.versions.electron+",", "Node.js", process.versions.node+",", "Chromium", process.versions.chrome);
 
 
@@ -57,7 +57,7 @@ geometry.setDrawRange(0, 8);
 let lines = new THREE.LineSegments( geometry, material );
 lines.frustumCulled = false; // Prevents bounding sphere calculation error
 scene.add(lines);
-lines.position.x = 140; // center on screen
+lines.position.x = 140 * config.RENDER_SCALE; // center horizontally on screen
 
 
 // Postprocessing Setup
@@ -152,7 +152,7 @@ function updateData() {
     if (n >= config.MAX_POINTS) break;
     for (let node of stroke.nodes) {
       if (n >= config.MAX_POINTS) break;
-      positions.set( [-config.W/2 + (node.x-ox) * s, config.H/2 - (node.y-oy) * s], iv );
+      positions.set( [-W/2 + (node.x-ox) * s, H/2 - (node.y-oy) * s], iv );
       iv += 2;
       if (n_stroke > 0) {
         indices.set( [n-1, n], ie );

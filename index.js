@@ -21,8 +21,8 @@ let mainWindow
 function createWindow (fullscreen) {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: config.W, 
-    height: config.H, 
+    width: config.W,
+    height: config.H,
     useContentSize: true,
     backgroundColor: '#000',
     kiosk: fullscreen

@@ -1,8 +1,9 @@
 module.exports = {
   W: 1280,
   H: 720,
+  RENDER_SCALE: 1,
   
-  LAUNCH_FULLSCREEN: 1,
+  LAUNCH_FULLSCREEN: 0,
   
   WS_URI: 'ws://localhost:8080',
   WS_RECONNECT_INTERVAL: 10000,

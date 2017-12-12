@@ -25,8 +25,11 @@ class DistanceTransformPass {
     this.rt2 = rt.clone();
     this.readBuffer = this.rt1;
     this.writeBuffer = this.rt2;
-    // this.numPasses = Math.max(size.width, size.height) / 2;
-    this.numPasses = 11; // for 1280 px 
+    // this.numPasses = 11; // for 1280 px 
+    // this.startK = 1024; // for 1280 px 
+    this.numPasses = Math.ceil( Math.log2(size.width) );
+    this.startK = Math.pow( 2, this.numPasses-1 );
+    debug("numPasses", this.numPasses, this.startK);
     
     this.initPass = new THREE.ShaderPass({
       vertexShader: shader('copy.vert'),
@@ -75,7 +78,7 @@ class DistanceTransformPass {
     this.initPass.render( renderer, this.readBuffer, sourceBuffer, delta, maskActive );
     
     // run jump flooding algoritm (JFA) in ping pong loop
-    let k = 1024; // for 1280 px 
+    let k = this.startK;
     for (let i=0; i<this.numPasses; i++) {
       this.jfaPass.uniforms['k'].value = k;
       //                             target            source
