@@ -9,6 +9,7 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const isDev = require('electron-is-dev');
 
 // set environment variable for debug package
 process.env['DEBUG'] = debug;
@@ -34,7 +35,7 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  if (isDev) mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
