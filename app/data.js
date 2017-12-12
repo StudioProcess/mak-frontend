@@ -196,6 +196,28 @@ const getPage = (n) => {
 // }
 
 
+
+// Find page bounds
+// let xMin = Number.MAX_VALUE;
+// let xMax = 0;
+// let yMin = Number.MAX_VALUE;
+// let yMax = 0;
+// function printBounds() {
+//   debug("x bounds", xMin, xMax, "y bounds", yMin, yMax);
+// }
+// 
+// // find page bounds
+// event$.subscribe(e => {
+//   if (e.type == 'stroke') {
+//     let node = e.node;
+//     if (node.x < xMin) { xMin = node.x; printBounds(); }
+//     else if (node.x > xMax) { xMax = node.x; printBounds(); }
+//     if (node.y < yMin) { yMin = node.y; printBounds(); }
+//     else if (node.y > yMax) { yMax = node.y; printBounds(); }
+//   }
+// });
+
+
 module.exports = {
   event$,
   stroke$: Rx.Observable.from(stroke$),

@@ -14,6 +14,9 @@ module.exports = {
   DEFAULT_SECTION_ID: 3,
   DEFAULT_NOTE_ID: 24,
   
+  PAGE_OFFSET: [1, 1],
+  PAGE_DIMENSIONS: [125, 90],
+  
   DUMP_ALL_DATA: 0,
   CLEAR_ALL_DATA: 0 // !!! WARNING !!!
 };

@@ -55,6 +55,7 @@ geometry.setDrawRange(0, 8);
 let lines = new THREE.LineSegments( geometry, material );
 lines.frustumCulled = false; // Prevents bounding sphere calculation error
 scene.add(lines);
+lines.position.x = 140; // center on screen
 
 
 // Postprocessing Setup
@@ -66,11 +67,11 @@ composer.addPass(renderPass);
 const noisePass = new THREE.ShaderPass({
   vertexShader: shader('copy.vert'),
   fragmentShader: shader('noise.frag'),
-  uniforms: { 
+  uniforms: {
     "tDiffuse": { value: null },
     "time" : { value: 0.0 },
     "amount":  { value: 0.1 }
-  } 
+  }
 });
 
 const hillshadePass = new THREE.ShaderPass({
@@ -119,6 +120,10 @@ let pageData;
 let nodeData = [];
 let dataNeedsUpdate;
 
+const ox = config.PAGE_OFFSET[0];
+const oy = config.PAGE_OFFSET[1];
+const s = Math.min( W / config.PAGE_DIMENSIONS[0], H / config.PAGE_DIMENSIONS[1]);
+
 function updateData() {
   // vertex buffer attribute is here: geometry.attributes.position
   // index buffer attribute is here: geometry.index
@@ -140,7 +145,7 @@ function updateData() {
     if (n >= config.MAX_POINTS) break;
     for (let node of stroke.nodes) {
       if (n >= config.MAX_POINTS) break;
-      positions.set( [-config.W/2 + (node.x-5) * 10, config.H/2 - (node.y-5) * 10], iv );
+      positions.set( [-config.W/2 + (node.x-ox) * s, config.H/2 - (node.y-oy) * s], iv );
       iv += 2;
       if (n_stroke > 0) {
         indices.set( [n-1, n], ie );
@@ -189,10 +194,10 @@ let elapsedTime = 0.0;
 
 // let altitude = 45;
 function animate(time) {
+  stats.begin();
   elapsedTime = time-prevTime;
   prevTime = time;
-  
-  stats.begin();
+
   update(time);
   noisePass.uniforms.time.value = time;
   hillshadePass.uniforms.azimuth.value += 0.33;
@@ -203,8 +208,8 @@ function animate(time) {
   // dtPass.finalPass.uniforms.maxDist.value -= 0.5;
   // renderer.render( scene, camera );
   composer.render(time);
-  stats.end();
   
+  stats.end();
   requestAnimationFrame( animate );
 }
 animate();
@@ -214,7 +219,7 @@ animate();
 /* 
   LOAD PAGE DATA
  */
-let currentPage = 5;
+let currentPage = 12;
 
 function loadPage(n) {
   if (n < 1) n = 1; // 1 is the first page number
