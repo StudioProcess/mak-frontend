@@ -1,4 +1,4 @@
-#define INF 99999.
+#define INF 999999.
 
 varying vec2 vUv;
 

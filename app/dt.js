@@ -25,6 +25,8 @@ class DistanceTransformPass {
     this.rt2 = rt.clone();
     this.readBuffer = this.rt1;
     this.writeBuffer = this.rt2;
+    // this.numPasses = Math.max(size.width, size.height) / 2;
+    this.numPasses = 11;
     
     this.initPass = new THREE.ShaderPass({
       vertexShader: shader('copy.vert'),
@@ -37,6 +39,16 @@ class DistanceTransformPass {
       vertexShader: shader('copy.vert'),
       fragmentShader: shader('dt_final.frag'),
       uniforms: { "tDiffuse": { value: null } }
+    });
+    
+    this.jfaPass = new THREE.ShaderPass({
+      vertexShader: shader('dt.vert'),
+      fragmentShader: shader('dt.frag'),
+      uniforms: { 
+        "tDiffuse": { value: null },
+        "texOffset": { value: new THREE.Vector2(1.0/size.width, 1.0/size.height) },
+        "k": { value: 1.0 }
+      }
     });
   }
   
@@ -54,16 +66,23 @@ class DistanceTransformPass {
     // initialize the read buffer from the source render target
     // Use a fragment shader to set initial vectors and squared distances
     //                              target           source
-    this.initPass.render( renderer, this.readBuffer, sourceBuffer, delta, false );
+    this.initPass.render( renderer, this.readBuffer, sourceBuffer, delta, maskActive );
     
-    // TODO: jump flooding algoritm (JFA)
+    // run jump flooding algoritm (JFA) in ping pong loop
+    let k = 1024;
+    for (let i=0; i<this.numPasses; i++) {
+      this.jfaPass.uniforms['k'].value = k;
+      //                             target            source
+      this.jfaPass.render( renderer, this.writeBuffer, this.readBuffer, delta, maskActive)
+      this.swapBuffers();
+      k = k / 2;
+    }
     
     // render the distance field to the final render target
     this.finalPass.renderToScreen = this.renderToScreen;
     this.finalPass.needsSwap = this.needsSwap;
     //                               target        source
-    this.finalPass.render( renderer, targetBuffer, this.readBuffer, delta, false );
-    // this.finalPass.render( renderer, targetBuffer, sourceBuffer, delta, maskActive );
+    this.finalPass.render( renderer, targetBuffer, this.readBuffer, delta, maskActive );
 
   }
   
