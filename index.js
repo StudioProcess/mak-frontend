@@ -78,14 +78,15 @@ function setupMenu() {
     label: app.getName(),
     submenu: [
       { label: 'Fullscreen (Kiosk)',
-        accelerator: 'CmdOrCtrl+Shift+F',
+        accelerator: 'CmdOrCtrl+F',
         click: () => { mainWindow.setKiosk(!mainWindow.isKiosk()); }
       },
-      {role: 'reload', accelerator: 'CmdOrCtrl+Shift+R' },
+      {role: 'reload', accelerator: 'CmdOrCtrl+R' },
+      {role: 'toggledevtools', accelerator: 'CmdOrCtrl+Alt+I' },
       {type: 'separator' },
-      {role: 'quit',  accelerator: 'CmdOrCtrl+Shift+W' }
+      {role: 'quit',  accelerator: 'CmdOrCtrl+Q' }
     ]
-  }];
+  }, { role: 'editMenu'}, { role: 'windowMenu'}];
   const menu = electron.Menu.buildFromTemplate(template);
   electron.Menu.setApplicationMenu(menu)
 }
