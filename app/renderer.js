@@ -11,6 +11,7 @@ require('three/examples/js/postprocessing/RenderPass');
 require('three/examples/js/postprocessing/ShaderPass');
 require('three/examples/js/shaders/CopyShader');
 const shader = require('./loadShader');
+const DistanceTransformPass = require('./dt');
 // debug(THREE);
 
 const config = require('../config');
@@ -68,16 +69,6 @@ const noisePass = new THREE.ShaderPass({
   uniforms: { "tDiffuse": { value: null }, "amount":  { value: 0.1 }, "time" : { value: 0.0 } }
 });
 
-const dtPass = new THREE.ShaderPass({
-  vertexShader: shader('dt.vert'),
-  fragmentShader: shader('dt.frag'),
-  uniforms: { 
-    "tDiffuse": { value: null }, 
-    "screenSize": { value: new THREE.Vector2(W, H) },
-    "k":  { value: 1.0 } 
-  }
-});
-
 const hillshadePass = new THREE.ShaderPass({
   vertexShader: shader('copy.vert'),
   fragmentShader: shader('hillshade.frag'),
@@ -91,13 +82,26 @@ const hillshadePass = new THREE.ShaderPass({
   }
 });
 
-// composer.addPass(dtPass);
-composer.addPass(hillshadePass);
-composer.addPass(noisePass);
-// dtPass.renderToScreen = true;
-// hillshadePass.renderToScreen = true;
-noisePass.renderToScreen = true;
+const dtPass = new DistanceTransformPass(THREE, renderer);
+composer.addPass(dtPass);
+dtPass.renderToScreen = true;
+// 
+// composer.addPass(hillshadePass);
+// composer.addPass(noisePass);
 
+
+// hillshadePass.renderToScreen = true;
+// noisePass.renderToScreen = true;
+
+
+// const finalPass = new THREE.ShaderPass({
+//   vertexShader: shader('copy.vert'),
+//   fragmentShader: shader('dt_final.frag'),
+//   uniforms: { "tDiffuse": { value: null } }
+// });
+// 
+// composer.addPass(finalPass);
+// finalPass.renderToScreen = true;
 
 
 /* 
