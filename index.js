@@ -24,8 +24,7 @@ function createWindow (fullscreen) {
     width: config.W,
     height: config.H,
     useContentSize: true,
-    backgroundColor: '#000',
-    kiosk: fullscreen
+    backgroundColor: '#000'
   });
 
   // and load the index.html of the app.
@@ -34,10 +33,16 @@ function createWindow (fullscreen) {
     protocol: 'file:',
     slashes: true
   }))
-
+  
+  if (fullscreen) {
+    setTimeout(function() {
+      mainWindow.setKiosk(true);
+    }, 7000);
+  }
+  
   // Open the DevTools.
   if (isDev && !fullscreen) mainWindow.webContents.openDevTools()
-
+  
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
@@ -72,7 +77,11 @@ app.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
-    createWindow()
+    if (config.LAUNCH_FULLSCREEN || !isDev) {
+      createWindow(true); // true for fullscreen
+    } else {
+      createWindow();
+    }
   }
 })
 
