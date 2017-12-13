@@ -72,9 +72,8 @@ let currentTime = 0;
 let currentNoteId;
 
 event$.subscribe(event => {
-  
   if (event.type == 'stroke') { // add stroke data
-    // TODO: what happens if we don't have a new stroke at that point?
+    if (currentStroke == undefined) return;
     currentTime += event.node.timeDiff;
     event.node.time = currentTime;
     currentStroke.nodes.push( event.node );
@@ -87,11 +86,13 @@ event$.subscribe(event => {
         currentStroke.timeDiff = event.time - lastStroke.upTime;
       }
     } else if (event.status == 'up') { // end stroke
+      if (currentStroke == undefined) return;
       currentStroke.upTime = event.time;
       currentStroke.duration = currentStroke.upTime - currentStroke.downTime;
       currentStroke.noteId = currentNoteId;
       stroke$.next( currentStroke );
       lastStroke = currentStroke;
+      currentStroke = undefined;
     }
   } else if (event.type == 'activeNoteId') {
       currentNoteId = event;

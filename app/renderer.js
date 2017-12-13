@@ -282,7 +282,7 @@ class RenderManager {
     if (this.anim.currentIdx >= this.anim.targetIdx) { // hitting end of animation
       this.anim.currentIdx = this.anim.targetIdx;
       this.anim.offsetIdx = this.anim.targetIdx;
-      debug("HITTING END", this.anim);
+      // debug("HITTING END", this.anim);
     }
     
     this.render.geometry.setDrawRange(0, this.anim.currentIdx);
