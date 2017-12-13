@@ -95,7 +95,7 @@ hillshadePass.material.depthTest = false;
 debug('hillshadePass', hillshadePass.material);
 
 const dtPass = new DistanceTransformPass(THREE, renderer);
-dtPass.finalPass.uniforms.maxDist.value = 5;
+dtPass.finalPass.uniforms.maxDist.value = 150;
 composer.addPass(dtPass);
 // dtPass.renderToScreen = true;
 
@@ -146,8 +146,8 @@ class RenderManager {
       currentIdx: 0, // index we're currently drawing up to
       targetIdx: 0, // index to draw up to when animation is finished
       startTime: 0, // when the animation was started
-      speed: 400, // animation speed in indices per second
-      liveSpeed: 100,
+      speed: config.ANIM_SPEED, // animation speed in indices per second
+      liveSpeed: config.ANIM_SPEED_LIVE,
       isLive: false
     };
     
@@ -305,23 +305,29 @@ const ox = config.PAGE_OFFSET[0];
 const oy = config.PAGE_OFFSET[1];
 const s = Math.min( W / config.PAGE_DIMENSIONS[0], H / config.PAGE_DIMENSIONS[1]);
 
+
+// ANIMATION PARAMETERS
+let baseDist = 220;
+let aziSpeed = 10;
+
+let altMin = 18;
+let altMax = 60;
+let altSpeed = 1;
+
 function animate(time) {
   stats.begin();
   
-  // update(time);
   renderMan.update(time);
-  noisePass.uniforms.time.value = time;
-  hillshadePass.uniforms.azimuth.value += 0.33;
-    // hillshadePass.uniforms.altitude.value += 0.33;
-    
-  // altitude = (altitude + 0.5) % 360;
-  // hillshadePass.uniforms.altitude.value = altitude;
-  // dtPass.finalPass.uniforms.maxDist.value -= 0.5;
-  // renderer.render( scene, camera );
-  composer.render(time);
   
-  // let dep = renderer.context.getParameter(renderer.context.DEPTH_TEST);
-  // debug("depth test", dep);
+  dtPass.finalPass.uniforms.maxDist.value = baseDist + Math.sin(time/10000) * baseDist + 10;
+  
+  hillshadePass.uniforms.azimuth.value = (time/1000.0 * aziSpeed) % 360;
+  hillshadePass.uniforms.altitude.value = altMin + (altMax-altMin) * (Math.sin(time/10000*altSpeed)*0.5 + 0.5);
+  
+  noisePass.uniforms.time.value = time;
+  // hillshadePass.uniforms.z_factor = 
+
+  composer.render(time);
   
   stats.end();
   requestAnimationFrame( animate );

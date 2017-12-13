@@ -12,6 +12,8 @@ module.exports = {
   DUMP_FOLDER: 'db_dump_json',
   
   MAX_POINTS: 10000,
+  ANIM_SPEED: 400,
+  ANIM_SPEED_LIVE: 150,
   
   DEFAULT_OWNER_ID: 28,
   DEFAULT_SECTION_ID: 3,
