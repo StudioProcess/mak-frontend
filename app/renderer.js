@@ -409,6 +409,7 @@ function startIdleMode() {
   debug("START IDLE");
   idleTimer = setInterval(nextSlide, config.SLIDE_TIME);
   renderMan.anim.isLive = false;
+  nextSlide();
 }
 
 function resetIdleTimer() {
