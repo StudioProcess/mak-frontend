@@ -341,7 +341,7 @@ animate();
  */
 let currentPage = 5;
 
-function loadPage(n) {
+function loadPageNumber(n) {
   if (n < 1) n = 1; // 1 is the first page number
   debug('loading page', n);
   data.getPage(n).then(data => {
@@ -350,14 +350,20 @@ function loadPage(n) {
   });
 }
 
-loadPage(currentPage);
+function loadRandomPage() {
+  data.getRandomPageNumber().then(pageNum => {
+    loadPageNumber(pageNum);
+  });
+}
+
+loadPageNumber(currentPage);
 
 window.addEventListener('keyup', e => {
   if (e.keyCode == 37) { // LEFT ARROW
-    loadPage(currentPage - 1);
+    loadPageNumber(currentPage - 1);
   } 
   else if (e.keyCode == 39) { // RIGHT ARROW
-    loadPage(currentPage + 1);
+    loadPageNumber(currentPage + 1);
   }
 }, true);
 
@@ -366,10 +372,10 @@ window.addEventListener('keyup', e => {
 /* 
   LIVE DATA
  */
-let IDLE_BEFORE_SLIDESHOW = 10000;
 
 data.stroke$.subscribe(stroke => {
   //debug("LIVE STROKE", stroke);
+  resetIdleTimer();
   
   if (!renderMan.anim.isLive) {
     renderMan.updateDataNewPage([]);
@@ -378,3 +384,61 @@ data.stroke$.subscribe(stroke => {
   
   requestAnimationFrame(() => { renderMan.updateDataAddStroke(stroke); });
 });
+
+
+window.addEventListener('keyup', e => {
+  if (e.keyCode == 80) { // P
+    loadRandomPage();
+  } 
+}, true);
+
+
+
+
+
+let slideTimer = 0;
+let idleTimer = 0;
+
+function nextSlide() {
+  debug("NEXT SLIDE");
+  loadRandomPage();
+  // slideTimer = setTimeout( nextSlide, config.SLIDE_TIME );
+}
+
+function startIdleMode() {
+  debug("START IDLE");
+  idleTimer = setInterval(nextSlide, config.SLIDE_TIME);
+  renderMan.anim.isLive = false;
+}
+
+function resetIdleTimer() {
+  debug("TIMER RESET", slideTimer, idleTimer );
+  clearInterval( slideTimer );
+  clearTimeout( idleTimer );
+  idleTimer = setTimeout( startIdleMode, config.IDLE_BEFORE_SLIDESHOW );
+}
+
+resetIdleTimer();
+
+
+// class IdleMode {
+//   constructor() {
+//     this.resetTimer();
+//     debug(this);
+//   }
+// 
+//   nextSlide() {
+//     debug("NEXT SLIDE");
+//     loadRandomPage();
+//     this.slideTimer = setTimeout( this.nextSlide.bind(this), config.SLIDE_TIME );
+//   }
+// 
+//   resetTimer() {
+//     debug("TIMER RESET");
+//     clearTimeout( this.slideTimer );
+//     clearTimeout( this.switchTimer );
+//     this.switchTimer = setTimeout( this.nextSlide.bind(this), config.IDLE_BEFORE_SLIDESHOW );
+//   }
+// }
+// 
+// let idleMode = new IdleMode();

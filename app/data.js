@@ -188,7 +188,7 @@ const getPage = (n) => {
 };
 
 
-// Returns a Set() of available page numbers (i.e. pages with strokes)
+// Returns a array of available page numbers (i.e. pages with strokes)
 const getPageNumbers = () => {
   return db.strokes.allDocs({
     include_docs: false
@@ -197,13 +197,29 @@ const getPageNumbers = () => {
     for (row of result.rows) {
       pageSet.add( parseInt(row.id.substring(9, 13)) ); // get page part from id
     }
-    return pageSet;
+    return Array.from(pageSet);
   });
 };
 
-getPageNumbers().then(res => {
-  debug(res);
-});
+// getPageNumbers().then(res => {
+//   debug(res);
+// });
+
+
+// Returns a random page number
+const getRandomPageNumber = () => {
+  return getPageNumbers().then(pageNums => {
+    let idx = Math.floor( Math.random() * pageNums.length );
+    return pageNums[idx];
+  });
+};
+
+// Returns a random page from pages with data
+const getRandomPage = () => {
+  return getRandomPageNumber().then( pageNum => getPage(pageNum) );
+};
+
+
 
 
 // Find page bounds
@@ -231,5 +247,7 @@ module.exports = {
   event$,
   stroke$: Rx.Observable.from(stroke$),
   getPage,
-  getPageNumbers
+  getPageNumbers,
+  getRandomPage,
+  getRandomPageNumber
 }
