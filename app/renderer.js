@@ -119,92 +119,197 @@ noisePass.renderToScreen = true;
 // finalPass.renderToScreen = true;
 
 
+
+
+
+class RenderManager {
+  
+  constructor(geometry) {
+    /* RENDER SYSTEM */
+    this.render = {
+      geometry: geometry,
+      
+      positionAttr: geometry.attributes.position, // BufferAttribute holding positions
+      indexAttr: geometry.index, // BufferAttribute holding indices
+      
+      positionData: geometry.attributes.position.array, // TypedArray holding position data
+      indexData: geometry.index.array, // TypedArray holding index data
+      
+      nodeCount: 0, // total number of nodes available
+      positionPointer: 0, // i.e. length of position data to render
+      indexPointer: 0, // i.e. length of index data to render
+    };
+    
+    /* ANIMATION SYSTEM */
+    this.anim = {
+      offsetIdx:0,
+      currentIdx: 0, // index we're currently drawing up to
+      targetIdx: 0, // index to draw up to when animation is finished
+      startTime: 0, // when the animation was started
+      speed: 400, // animation speed in indices per second
+      liveSpeed: 100,
+      isLive: false
+    };
+    
+    /* UPDATE SYSTEM */
+    this.updateState = { // can't call it 'update' because of the function
+      needsUpdate: false, // setting this to true triggers data upload on next update
+      strokes: [], // Stroke data to upload
+      clearPage: false, // whether to start a new page when updating (nulls all data and adds from the beginning)
+    };
+  }
+  
+  // // get node list from a stroke
+  // static function getNodes(stroke) {
+  //   return data.reduce( (acc, stroke) => acc.concat(stroke.nodes), [] );
+  // }
+  
+  // set update system state for putting data for a completely new page
+  updateDataNewPage(strokes) {
+    this.updateState.strokes = strokes;
+    this.updateState.clearPage = true;
+    this.updateState.needsUpdate = true;
+  }
+  
+  // set update system state for putting data for one additional stroke
+  updateDataAddStroke(stroke) {
+    if (!this.updateState.needsUpdate) {
+      this.updateState.strokes = [stroke];
+      this.updateState.needsUpdate = true;
+    } else {
+      this.updateState.strokes.push(stroke);
+    }
+    this.updateState.clearPage = false;
+  }
+  
+  // update data according to update system state
+  updateData() {
+    if (this.updateState.clearPage) {
+      this.render.indexData.fill(0); // clear index data so we can overdraw a bit
+      this.render.nodeCount = 0;
+      this.render.positionPointer = 0; // start filling at the beginning
+      this.render.indexPointer = 0; // start filling at the beginning
+    }
+    let positionPointerStart = this.render.positionPointer; // save position pointer
+    let indexPointerStart = this.render.indexPointer; // save index pointer
+
+    let n_stroke = 0; // node index within the current stroke
+    
+    strokeLoop: // label to break out of this loop
+    for (let stroke of this.updateState.strokes) {
+      for (let node of stroke.nodes) {
+        if (this.render.nodeCount >= config.MAX_POINTS) {
+          break strokeLoop; // break out of the whole loop
+        }
+        
+        this.render.positionData.set(
+          [ -W/2 + (node.x-ox) * s,  H/2 - (node.y-oy) * s ],
+          this.render.positionPointer
+        );
+        this.render.positionPointer += 2;
+        
+        if (n_stroke > 0) {
+          this.render.indexData.set(
+            [ this.render.nodeCount-1, this.render.nodeCount],
+            this.render.indexPointer
+          );
+          this.render.indexPointer += 2;
+        }
+        
+        this.render.nodeCount++;
+        n_stroke++;
+      }
+      n_stroke = 0; // reset node count within stroke
+    }
+    
+    this.render.positionAttr.needsUpdate = true;
+    this.render.indexAttr.needsUpdate = true;
+    let numPositionsUpdated = this.render.positionPointer - positionPointerStart;
+    let numIndicesUpdated = this.render.indexPointer - indexPointerStart;
+    if (this.updateState.clearPage) {
+      this.render.positionAttr.updateRange.offset = 0;
+      this.render.positionAttr.updateRange.count = -1;
+      this.render.indexAttr.updateRange.offset = 0;
+      this.render.indexAttr.updateRange.count = -1;
+    } else {
+      this.render.positionAttr.updateRange.offset = positionPointerStart;
+      this.render.positionAttr.updateRange.count = numPositionsUpdated;
+      this.render.indexAttr.updateRange.offset = indexPointerStart;
+      this.render.indexAttr.updateRange.count = numIndicesUpdated;
+    }
+    this.render.geometry.setDrawRange(0, this.render.nodeCount*2);
+    debug('nodes updated:', numPositionsUpdated/2);
+    debug('nodes total:', this.render.nodeCount);
+  }
+  
+  
+  // call every frame
+  // update data (if necessary) and animation
+  update(time) {
+    
+    // new data coming
+    if (this.updateState.needsUpdate) {
+      this.updateData();
+      this.updateState.needsUpdate = false;
+      
+      // calculate number of new indices based on stroke data
+      let newIndices = 0;
+      for (let stroke of this.updateState.strokes) {
+        newIndices += (stroke.nodes.length - 1) * 2;
+      }
+      debug("NEW INDICES", newIndices);
+      
+      if (this.updateState.clearPage) { // restart animation from beginning
+        this.anim.startTime = time;
+        this.anim.offsetIdx = 0;
+        this.anim.currentIdx = 0;
+        this.anim.targetIdx = newIndices;
+        debug("CLEAR PAGE", this.anim);
+      } else {
+        if (this.anim.currentIdx >= this.anim.targetIdx) { // animation is finished
+          this.anim.startTime = time;
+        }
+        this.anim.targetIdx += newIndices;
+      }
+    }
+    
+    let animationTime = time - this.anim.startTime;
+    let speed = this.anim.isLive ? this.anim.liveSpeed : this.anim.speed;
+    // Fixed speed animation looks much better than stored values:
+    this.anim.currentIdx = this.anim.offsetIdx + animationTime/1000 * speed;
+    
+    // if (this.currentIdx >= this.render.nodeCount) this.currentIdx = this.render.nodeCount; // don't draw more than neccessary
+    if (this.anim.currentIdx >= this.anim.targetIdx) { // hitting end of animation
+      this.anim.currentIdx = this.anim.targetIdx;
+      this.anim.offsetIdx = this.anim.targetIdx;
+      debug("HITTING END", this.anim);
+    }
+    
+    this.render.geometry.setDrawRange(0, this.anim.currentIdx);
+  }
+  
+}
+
+const renderMan = new RenderManager(geometry);
+debug(renderMan);
+
+
+
+
+
 /* 
   RENDER LOOP
  */
-
-let pageData;
-let nodeData = [];
-let dataNeedsUpdate;
 
 const ox = config.PAGE_OFFSET[0];
 const oy = config.PAGE_OFFSET[1];
 const s = Math.min( W / config.PAGE_DIMENSIONS[0], H / config.PAGE_DIMENSIONS[1]);
 
-function updateData() {
-  // vertex buffer attribute is here: geometry.attributes.position
-  // index buffer attribute is here: geometry.index
-  // properties: array, needsUpdate, updateRange()
-
-  let positions = geometry.attributes.position.array;
-  let indices = geometry.index.array;
-  // clear arrays
-  positions.fill(0);
-  indices.fill(0);
-  
-  let n = 0; // current node
-  let n_stroke = 0; // current node within the current stroke
-  
-  let iv = 0; // current index into vertex buffer
-  let ie = 0; // current index into index (i.e. element) buffer
-  
-  for (let stroke of pageData) {
-    if (n >= config.MAX_POINTS) break;
-    for (let node of stroke.nodes) {
-      if (n >= config.MAX_POINTS) break;
-      positions.set( [-W/2 + (node.x-ox) * s, H/2 - (node.y-oy) * s], iv );
-      iv += 2;
-      if (n_stroke > 0) {
-        indices.set( [n-1, n], ie );
-        ie += 2;
-      }
-      n_stroke++;
-      n++;
-    }
-    n_stroke = 0;
-  }
-  debug('uploaded nodes:', n);
-  geometry.attributes.position.needsUpdate = true;
-  geometry.index.needsUpdate = true;
-  geometry.setDrawRange(0, n);
-}
-
-
-let animationStart;
-let firstNodeTime;
-let currentIdx = 0; // current dot index
-let animationSpeed = 200; // in nodes per second
-
-function update(time) {
-  if (dataNeedsUpdate) {
-    updateData();
-    dataNeedsUpdate = false;
-    animationStart = time;
-    firstNodeTime = nodeData.length > 0 ? nodeData[0].time : 0;
-    currentIdx = 0;
-  }
-  let animationTime = time - animationStart;
-  // Animation based on stored values
-  // let lookupTime = firstNodeTime + animationTime;
-  // while (currentIdx < nodeData.length 
-  //     && nodeData[currentIdx].time < lookupTime) {
-  //   currentIdx++;
-  // }
-  // Fixed speed animation looks much better than stored values:
-  currentIdx = animationTime/1000 * animationSpeed;
-  if (currentIdx >= nodeData.length) currentIdx = nodeData.length; // don't draw more than neccessary
-  geometry.setDrawRange(0, currentIdx*2); // TODO: need correct length, respecting stroke gaps
-}
-
-// let prevTime = 0.0;
-// let elapsedTime = 0.0;
-
 function animate(time) {
   stats.begin();
-  // elapsedTime = time-prevTime;
-  // prevTime = time;
-
-  update(time);
+  
+  // update(time);
+  renderMan.update(time);
   noisePass.uniforms.time.value = time;
   hillshadePass.uniforms.azimuth.value += 0.33;
     // hillshadePass.uniforms.altitude.value += 0.33;
@@ -228,21 +333,14 @@ animate();
 /* 
   LOAD PAGE DATA
  */
-let currentPage = 12;
+let currentPage = 5;
 
 function loadPage(n) {
   if (n < 1) n = 1; // 1 is the first page number
   debug('loading page', n);
   data.getPage(n).then(data => {
-    // if (data.length == 0) return; // nothing to see here
-    let nodes = data.reduce((acc, stroke) => acc.concat(stroke.nodes), []);
-    pageData = data;
-    nodeData = nodes;
-    dataNeedsUpdate = true;
+    renderMan.updateDataNewPage(data);
     currentPage = n;
-    
-    debug("strokes", pageData.length);
-    debug("nodes", nodeData.length);
   });
 }
 
@@ -256,3 +354,21 @@ window.addEventListener('keyup', e => {
     loadPage(currentPage + 1);
   }
 }, true);
+
+
+
+/* 
+  LIVE DATA
+ */
+let IDLE_BEFORE_SLIDESHOW = 10000;
+
+data.stroke$.subscribe(stroke => {
+  //debug("LIVE STROKE", stroke);
+  
+  if (!renderMan.anim.isLive) {
+    renderMan.updateDataNewPage([]);
+    renderMan.anim.isLive = true;
+  }
+  
+  requestAnimationFrame(() => { renderMan.updateDataAddStroke(stroke); });
+});
