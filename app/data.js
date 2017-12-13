@@ -186,15 +186,23 @@ const getPage = (n) => {
   });
 };
 
-// getPage(4).then(data => {
-//   debug("page 4 data", data);
-// });
 
-// // Page: [Stroke]
-// function gpuDataFromPage(page) {
-// 
-// }
+// Returns a Set() of available page numbers (i.e. pages with strokes)
+const getPageNumbers = () => {
+  return db.strokes.allDocs({
+    include_docs: false
+  }).then( result => {
+    let pageSet = new Set();
+    for (row of result.rows) {
+      pageSet.add( parseInt(row.id.substring(9, 13)) ); // get page part from id
+    }
+    return pageSet;
+  });
+};
 
+getPageNumbers().then(res => {
+  debug(res);
+});
 
 
 // Find page bounds
@@ -222,4 +230,5 @@ module.exports = {
   event$,
   stroke$: Rx.Observable.from(stroke$),
   getPage,
+  getPageNumbers
 }
