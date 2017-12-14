@@ -7,9 +7,18 @@
     html, body { margin:0; padding:0; }
     #three_canvas { display:block; width:100vw; height:100vh; }
     body.is_fullscreen * { cursor: none; }
+    @font-face {
+      font-family: "GT America Standard";
+      font-weight: normal;
+      src: url("./app/assets/fonts/fonts/GT-America-Standard-Regular.ttf") format("ttf");
+    }
+    #pageNum { position:absolute; bottom:1vh; width:100%; text-align:center; z-index:9999; 
+      font-family:"GT America Standard", Helvetica; font-size:2vh; color:gray;
+    }
   </style>
 </head>
 <body>
+  <div id="pageNum">0</div>
   <script>
     const win = require("electron").remote.getCurrentWindow();
     win.on('enter-full-screen', () => {

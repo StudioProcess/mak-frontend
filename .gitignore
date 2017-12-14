@@ -62,5 +62,9 @@ db_data/*
 !db_data/.gitkeep
 db_dump_json
 
+# proprietary fonts
+app/assets/fonts/*
+!app/assets/fonts/.gitkeep
+
 # electron-packager output
 build

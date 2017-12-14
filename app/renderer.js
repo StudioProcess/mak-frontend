@@ -352,6 +352,7 @@ function loadPageNumber(n) {
     renderMan.updateDataNewPage(data);
     currentPage = n;
   });
+  setPageNumberDisplay(n);
 }
 
 function loadRandomPage() {
@@ -393,10 +394,12 @@ data.stroke$.subscribe(stroke => {
   
   if (!renderMan.anim.isLive) { // we are NOT live -> GO LIVE
     renderMan.clearPage();
+    setPageNumberDisplay(stroke.noteId.pageNum);
     renderMan.anim.isLive = true;
   } else { // we ARE live -> check if we have changed the page while writing
     if (!data.noteIdEquals(currentlivePageId, stroke.noteId)) {
       renderMan.clearPage(); // clear the page, since we have changed pages while writing
+      setPageNumberDisplay(stroke.noteId.pageNum);
     }
   }
   currentlivePageId = stroke.noteId; // keep track of the page we're writing on
@@ -458,3 +461,13 @@ resetIdleTimer();
 // }
 // 
 // let idleMode = new IdleMode();
+
+
+/* 
+  Page Number Display
+ */
+
+function setPageNumberDisplay(n) {
+  debug('SETTING PAGE NUM', n);
+  document.getElementById('pageNum').textContent = n;
+}
