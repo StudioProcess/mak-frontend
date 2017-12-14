@@ -23,14 +23,20 @@ uniform float k;
 //   return previousBest;
 // }
 
+float sqDist(vec2 p) {
+  return p.x*p.x + p.y*p.y;
+}
+
 vec4 pickBetter(vec4 n, vec2 offset, vec4 previousBest) {
   // if (n.x >= INF || n.y >= INF) return previousBest;
   vec4 candidate = n;
   if (n.x < INF && n.y < INF) {
     candidate = candidate + vec4(offset, 0.0, 0.0);
   }
-  float previousBestDist = distance(previousBest.xy, vec2(0.0));
-  float candidateDist = distance(candidate.xy, vec2(0.0));
+  // float previousBestDist = distance(previousBest.xy, vec2(0.0));
+  float previousBestDist = sqDist(previousBest.xy);
+  // float candidateDist = distance(candidate.xy, vec2(0.0));
+  float candidateDist = sqDist(candidate.xy);
   if (candidateDist < previousBestDist) return candidate;
   return previousBest;
 } 
