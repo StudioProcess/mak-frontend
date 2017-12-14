@@ -121,6 +121,7 @@ db.strokes.info().then(info => {
 // Equals function for NoteId object
 // NoteId: { pageNum, ownerId, sectionId, noteId }
 const noteIdEquals = (a, b) => {
+  if (!a || !b) return false;
   return a.pageNum === b.pageNum
       && a.noteId === b.noteId
       && a.sectionId === b.sectionId
@@ -246,6 +247,7 @@ const getRandomPage = () => {
 module.exports = {
   event$,
   stroke$: Rx.Observable.from(stroke$),
+  noteIdEquals,
   getPage,
   getPageNumbers,
   getRandomPage,

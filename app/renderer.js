@@ -164,6 +164,10 @@ class RenderManager {
   //   return data.reduce( (acc, stroke) => acc.concat(stroke.nodes), [] );
   // }
   
+  clearPage() {
+    this.updateDataNewPage([]); // just update with an empty stroke array
+  }
+  
   // set update system state for putting data for a completely new page
   updateDataNewPage(strokes) {
     this.updateState.strokes = strokes;
@@ -361,10 +365,19 @@ loadPageNumber(currentPage);
 window.addEventListener('keyup', e => {
   if (e.keyCode == 37) { // LEFT ARROW
     loadPageNumber(currentPage - 1);
+    // resetIdleTimer();
   } 
   else if (e.keyCode == 39) { // RIGHT ARROW
     loadPageNumber(currentPage + 1);
+    // resetIdleTimer();
   }
+}, true);
+
+window.addEventListener('keyup', e => {
+  if (e.keyCode == 80) { // P
+    loadRandomPage();
+    // resetIdleTimer();
+  } 
 }, true);
 
 
@@ -372,30 +385,32 @@ window.addEventListener('keyup', e => {
 /* 
   LIVE DATA
  */
+let currentlivePageId;
 
 data.stroke$.subscribe(stroke => {
   //debug("LIVE STROKE", stroke);
   resetIdleTimer();
   
-  if (!renderMan.anim.isLive) {
-    renderMan.updateDataNewPage([]);
+  if (!renderMan.anim.isLive) { // we are NOT live -> GO LIVE
+    renderMan.clearPage();
     renderMan.anim.isLive = true;
+  } else { // we ARE live -> check if we have changed the page while writing
+    if (!data.noteIdEquals(currentlivePageId, stroke.noteId)) {
+      renderMan.clearPage(); // clear the page, since we have changed pages while writing
+    }
   }
+  currentlivePageId = stroke.noteId; // keep track of the page we're writing on
   
+  // add the stroke only in the NEXT frame, since we might need to be clearing the page first
   requestAnimationFrame(() => { renderMan.updateDataAddStroke(stroke); });
 });
 
 
-window.addEventListener('keyup', e => {
-  if (e.keyCode == 80) { // P
-    loadRandomPage();
-  } 
-}, true);
 
 
-
-
-
+/* 
+  IDLE MODE
+ */
 let slideTimer = 0;
 let idleTimer = 0;
 
