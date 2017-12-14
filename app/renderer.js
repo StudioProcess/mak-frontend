@@ -318,6 +318,9 @@ let altMin = 18;
 let altMax = 60;
 let altSpeed = 1;
 
+let noiseTimeOffset = 0;
+let resetNoise = false;
+
 function animate(time) {
   stats.begin();
   
@@ -328,7 +331,8 @@ function animate(time) {
   hillshadePass.uniforms.azimuth.value = (time/1000.0 * aziSpeed) % 360;
   hillshadePass.uniforms.altitude.value = altMin + (altMax-altMin) * (Math.sin(time/10000*altSpeed)*0.5 + 0.5);
   
-  noisePass.uniforms.time.value = time;
+  if (resetNoise) { noiseTimeOffset = -time; resetNoise = false; } // cause a glitch
+  noisePass.uniforms.time.value = time + noiseTimeOffset;
   // hillshadePass.uniforms.z_factor = 
 
   composer.render(time);
@@ -353,6 +357,7 @@ function loadPageNumber(n) {
     currentPage = n;
   });
   setPageNumberDisplay(n);
+  resetNoise = true;
 }
 
 function loadRandomPage() {
@@ -395,11 +400,14 @@ data.stroke$.subscribe(stroke => {
   if (!renderMan.anim.isLive) { // we are NOT live -> GO LIVE
     renderMan.clearPage();
     setPageNumberDisplay(stroke.noteId.pageNum);
+    resetNoise = true; // cause a glitch
+    
     renderMan.anim.isLive = true;
   } else { // we ARE live -> check if we have changed the page while writing
     if (!data.noteIdEquals(currentlivePageId, stroke.noteId)) {
       renderMan.clearPage(); // clear the page, since we have changed pages while writing
       setPageNumberDisplay(stroke.noteId.pageNum);
+      resetNoise = true; // cause a glitch
     }
   }
   currentlivePageId = stroke.noteId; // keep track of the page we're writing on
