@@ -339,11 +339,11 @@ animate();
 /* 
   LOAD PAGE DATA
  */
-let currentPage = 5;
+let currentPage = config.START_PAGE;
 
 function loadPageNumber(n) {
   if (n < 1) n = 1; // 1 is the first page number
-  debug('loading page', n);
+  debug('LOADING PAGE', n);
   data.getPage(n).then(data => {
     renderMan.updateDataNewPage(data);
     currentPage = n;
@@ -413,7 +413,7 @@ function startIdleMode() {
 }
 
 function resetIdleTimer() {
-  debug("TIMER RESET", slideTimer, idleTimer );
+  // debug("TIMER RESET", slideTimer, idleTimer );
   clearInterval( slideTimer );
   clearTimeout( idleTimer );
   idleTimer = setTimeout( startIdleMode, config.IDLE_BEFORE_SLIDESHOW );
