@@ -27,7 +27,7 @@ var scene = new THREE.Scene();
 var camera = new THREE.OrthographicCamera( -W/2, W/2, H/2, -H/2, 1, 1000 );
 camera.position.z = 1; // need to move the camera outward (distance doesn't matter)
 scene.add( camera ); // not needed?
-var renderer = new THREE.WebGLRenderer({ antialias: true });
+var renderer = new THREE.WebGLRenderer({ antialias: false });
 renderer.setSize( W, H, false ); // false means don't set explicit px styles
 renderer.setFaceCulling(THREE.CullFaceNone);
 renderer.context.disable(renderer.context.DEPTH_TEST); // try it, but doesn't seem to work this way
