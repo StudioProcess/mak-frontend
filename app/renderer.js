@@ -371,18 +371,18 @@ loadPageNumber(currentPage);
 window.addEventListener('keyup', e => {
   if (e.keyCode == 37) { // LEFT ARROW
     loadPageNumber(currentPage - 1);
-    // resetIdleTimer();
+    resetSlideTimer();
   } 
   else if (e.keyCode == 39) { // RIGHT ARROW
     loadPageNumber(currentPage + 1);
-    // resetIdleTimer();
+    resetSlideTimer();
   }
 }, true);
 
 window.addEventListener('keyup', e => {
   if (e.keyCode == 80) { // P
     loadRandomPage();
-    // resetIdleTimer();
+    resetSlideTimer();
   } 
 }, true);
 
@@ -433,9 +433,9 @@ function nextSlide() {
 
 function startIdleMode() {
   debug("START IDLE");
-  idleTimer = setInterval(nextSlide, config.SLIDE_TIME);
+  resetSlideTimer();
   renderMan.anim.isLive = false;
-  nextSlide();
+  // nextSlide();
 }
 
 function resetIdleTimer() {
@@ -445,8 +445,12 @@ function resetIdleTimer() {
   idleTimer = setTimeout( startIdleMode, config.IDLE_BEFORE_SLIDESHOW );
 }
 
-resetIdleTimer();
+function resetSlideTimer() {
+  clearInterval( slideTimer );
+  slideTimer = setInterval(nextSlide, config.SLIDE_TIME);
+}
 
+startIdleMode();
 
 // class IdleMode {
 //   constructor() {
