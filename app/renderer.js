@@ -2,6 +2,8 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
+if (process.env['TEST']) { require('./test.js'); }
+
 const app = require('electron').remote.app;
 const debug = require('debug')('renderer');
 const THREE = require('three');

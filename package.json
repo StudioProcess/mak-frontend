@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "build": "rm -rf build && electron-packager . --out=build"
+    "build": "rm -rf build && electron-packager . --out=build",
+    "test": "TEST=1 electron ."
   },
   "repository": "https://github.com/StudioProcess/mak-frontend",
   "author": "Studio Process",

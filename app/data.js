@@ -118,17 +118,6 @@ db.strokes.info().then(info => {
 });
 
 
-// Equals function for NoteId object
-// NoteId: { pageNum, ownerId, sectionId, noteId }
-const noteIdEquals = (a, b) => {
-  if (!a || !b) return false;
-  return a.pageNum === b.pageNum
-      && a.noteId === b.noteId
-      && a.sectionId === b.sectionId
-      && a.ownerId === b.ownerId;
-};
-
-
 // Zero pad a number to a certain width
 function zeroFill( number, width ) {
   width -= number.toString().length;
@@ -161,6 +150,42 @@ const generateStrokeId = (noteId, strokeIdx) => {
     + "-" + zeroFill(ni.pageNum, 4)
   if (strokeIdx != undefined) id += "-" + zeroFill(strokeIdx, 16);
   return id;
+};
+
+
+// Equals function for NoteId object
+// NoteId: { pageNum, ownerId, sectionId, noteId }
+const noteIdEquals = (a, b, options = {ignorePage: false}) => {
+  if (!a || !b) return false;
+  let equals = a.noteId === b.noteId
+    && a.sectionId === b.sectionId
+    && a.ownerId === b.ownerId;
+  if (options && options.ignorePage) { return equals; }
+  return equals && a.pageNum === b.pageNum;
+};
+
+// noteId --> printed book page (according to PAGE_NUM_MAPPING config)
+const noteIdToBookPageNum = (noteId) => {
+  let mappings = config.PAGE_NUM_MAPPING.filter( m => noteIdEquals(m, noteId, {ignorePage:true}) );
+  for (let m of mappings) {
+    if (noteId.pageNum >= m.pageNum && noteId.pageNum <= m.pageNum + m.pages - 1) {
+      return noteId.pageNum - m.pageNum + m.bookPage;
+    }
+  }
+  return undefined;
+};
+
+// Printed book page --> NoteId (according to PAGE_NUM_MAPPING config)
+const bookPageNumToNoteId = (pageNum) => {
+  for (let m of config.PAGE_NUM_MAPPING) {
+    if (pageNum >= m.bookPage && pageNum <= m.bookPage + m.pages - 1) {
+      return { 
+        sectionId: m.sectionId, ownerId: m.ownerId, noteId: m.noteId,
+        pageNum: pageNum - m.bookPage + m.pageNum
+      };
+    }
+  }
+  return undefined;
 };
 
 
@@ -251,5 +276,7 @@ module.exports = {
   getPage,
   getPageNumbers,
   getRandomPage,
-  getRandomPageNumber
+  getRandomPageNumber,
+  noteIdToBookPageNum,
+  bookPageNumToNoteId
 }
