@@ -152,6 +152,21 @@ const generateStrokeId = (noteId, strokeIdx) => {
   return id;
 };
 
+const parseNoteId = (strokeId) => {
+  let strokePart = strokeId.substring(14)
+  let n = {
+    ownerId: parseInt( strokeId.substring(0, 2) ),
+    sectionId: parseInt( strokeId.substring(3, 5) ),
+    noteId: parseInt( strokeId.substring(6, 8) ),
+    pageNum: parseInt( strokeId.substring(9, 13) ),
+    strokeIdx: parseInt( strokePart ),
+  };
+  if (strokePart === '') { delete n.strokeIdx; }
+  if ( strokePart && Number.isNaN(n.strokeIdx) ) { return undefined; }
+  if ( Number.isNaN(n.ownerId) || Number.isNaN(n.sectionId) || Number.isNaN(n.noteId) || Number.isNaN(n.pageNum) ) return undefined;
+  return n;
+};
+
 
 // Equals function for NoteId object
 // NoteId: { pageNum, ownerId, sectionId, noteId }
@@ -273,6 +288,8 @@ module.exports = {
   event$,
   stroke$: Rx.Observable.from(stroke$),
   noteIdEquals,
+  generateStrokeId,
+  parseNoteId,
   getPage,
   getPageNumbers,
   getRandomPage,

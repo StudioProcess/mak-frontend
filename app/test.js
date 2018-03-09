@@ -131,3 +131,41 @@ for (let b of books) {
   };
   console.assert( data.noteIdToBookPageNum(n) === undefined, 'wrong noteId: ' + b );
 }
+
+
+
+/* StrokeId <--> NoteId */
+for (let i=0; i<90; i++) {
+  let n = {
+    sectionId: 0 + i,
+    ownerId: 1 + i,
+    noteId: 2 + i,
+    pageNum: 3 + i,
+  };
+  let expected = (''+n.ownerId).padStart(2, '0') 
+    + '-' + (''+n.sectionId).padStart(2, '0') 
+    + '-' + (''+n.noteId).padStart(2, '0') 
+    + '-' + (''+n.pageNum).padStart(4, '0');
+  let generated = data.generateStrokeId(n);
+  console.assert( generated === expected, 'generate stroke id (without stroke idx)' );
+  let parsed = data.parseNoteId(generated);
+  console.assert( data.noteIdEquals(parsed, n), 'parse note id (without stroke idx)' );
+  
+  let strokeIdx = 9999 + i;
+  expected += '-' + (''+strokeIdx).padStart(16, '0');
+  generated = data.generateStrokeId(n, strokeIdx);
+  console.assert( generated === expected, 'generate stroke id (with stroke idx) ' + data.generateStrokeId(n) );
+  parsed = data.parseNoteId(generated);
+  console.assert( data.noteIdEquals(parsed, n), 'parse note id (with stroke idx)' );
+  console.assert( parsed.strokeIdx === strokeIdx), 'parse note id: stroke idx)' ;
+
+  strokeIdx = undefined;
+  if (i % 5 == 0) n.sectionId = 'xx';
+  else if (i % 5 == 1) n.ownerId = 'xx';
+  else if (i % 5 == 2) n.noteId = 'xx';
+  else if (i % 5 == 3) n.pageNum = 'xxxx';
+  else if (i % 5 == 4) strokeIdx = 'xxxxxxxxxxxxxxxx';
+  generated = data.generateStrokeId(n, strokeIdx);
+  parsed = data.parseNoteId(generated);
+  console.assert( parsed === undefined, 'parse note id: erroneous input ' + JSON.stringify(parsed) );
+}
