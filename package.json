@@ -19,7 +19,7 @@
     "debug": "^3.1.0",
     "earcut": "^2.1.2",
     "electron-is-dev": "^0.3.0",
-    "pouchdb": "^6.4.3",
+    "pouchdb": "6.3.4",
     "rxjs": "^5.5.6",
     "stats.js": "^0.17.0",
     "three": "^0.90.0",
