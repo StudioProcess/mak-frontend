@@ -18,11 +18,7 @@ module.exports = {
   SLIDE_TIME: 45000,
   START_PAGE: 501,
   
-  DEFAULT_SECTION_ID: 3,
-  DEFAULT_OWNER_ID: 28,
-  DEFAULT_NOTE_ID: 24,
-  
-  /* Mapping NoteIds <--> Printed book pages */
+  /* Mapping of NeoSmartpen NoteIds <--> Printed book pages */
   PAGE_NUM_MAPPING: [
     { sectionId:3, ownerId:28, noteId:24, pageNum:1, pages:500, bookPage:1 },
     { sectionId:3, ownerId:28, noteId:25, pageNum:1, pages:500, bookPage:501 },

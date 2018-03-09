@@ -204,24 +204,16 @@ const bookPageNumToNoteId = (pageNum) => {
 };
 
 
-// Create an NoteId Object for a certain page number using default values
-const createNoteIdForPage = (pageNum) => {
-  return {
-    ownerId: config.DEFAULT_OWNER_ID,
-    sectionId: config.DEFAULT_SECTION_ID,
-    noteId: config.DEFAULT_NOTE_ID,
-    pageNum
-  };
-};
-
-
 // Get strokes for a certain page
 // Returns: Promise<[Stroke]>
 const getPage = (n) => {
+  let noteId = bookPageNumToNoteId( n ); // Get noteId according to mapping 
+  let noteIdEnd = Object.assign( {}, noteId, {pageNum: noteId.pageNum+1} ); // simply increment pageNum
+  // debug( generateStrokeId(noteId), generateStrokeId(noteIdEnd) );
   return db.strokes.allDocs({ 
     include_docs: true,
-    startkey: generateStrokeId( createNoteIdForPage(n) ),
-    endkey: generateStrokeId( createNoteIdForPage(n+1) ),
+    startkey: generateStrokeId( noteId ),
+    endkey: generateStrokeId( noteIdEnd ),
     inclusive_end: false
   }).then((result) => {
     return result.rows.map(row => row.doc);
@@ -229,14 +221,17 @@ const getPage = (n) => {
 };
 
 
-// Returns a array of available page numbers (i.e. pages with strokes)
+// Returns an array of available page numbers (i.e. pages with strokes)
 const getPageNumbers = () => {
   return db.strokes.allDocs({
     include_docs: false
   }).then( result => {
     let pageSet = new Set();
     for (row of result.rows) {
-      pageSet.add( parseInt(row.id.substring(9, 13)) ); // get page part from id
+      let noteId = parseNoteId(row.id); if (noteId === undefined) continue;
+      // Only keep pageNums that have valid mappings as defined in config
+      let pageNum = noteIdToBookPageNum(noteId); if (pageNum === undefined) continue;
+      pageSet.add( pageNum );
     }
     return Array.from(pageSet);
   });
