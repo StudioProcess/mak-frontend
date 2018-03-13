@@ -243,6 +243,7 @@ const getPageNumbers = () => {
 
 
 // Returns a random page number
+// Returns undefined if no pages exist
 const getRandomPageNumber = () => {
   return getPageNumbers().then(pageNums => {
     let idx = Math.floor( Math.random() * pageNums.length );
@@ -250,10 +251,11 @@ const getRandomPageNumber = () => {
   });
 };
 
+// NOTE: Currently not used
 // Returns a random page from pages with data
-const getRandomPage = () => {
-  return getRandomPageNumber().then( pageNum => getPage(pageNum) );
-};
+// const getRandomPage = () => {
+//   return getRandomPageNumber().then( pageNum => getPage(pageNum) );
+// };
 
 
 
@@ -287,7 +289,7 @@ module.exports = {
   parseNoteId,
   getPage,
   getPageNumbers,
-  getRandomPage,
+  // getRandomPage, // NOTE: Currently not used
   getRandomPageNumber,
   noteIdToBookPageNum,
   bookPageNumToNoteId

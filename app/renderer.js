@@ -352,6 +352,7 @@ animate();
 let currentPage = config.START_PAGE;
 
 function loadPageNumber(n) {
+  if (n === undefined) return;
   if (n < 1) n = 1; // 1 is the first page number
   debug('LOADING PAGE', n);
   data.getPage(n).then(data => {
