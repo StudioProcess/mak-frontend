@@ -402,14 +402,14 @@ data.stroke$.subscribe(stroke => {
   
   if (!renderMan.anim.isLive) { // we are NOT live -> GO LIVE
     renderMan.clearPage();
-    setPageNumberDisplay(stroke.noteId.pageNum);
+    setPageNumberDisplay(stroke.noteId);
     resetNoise = true; // cause a glitch
     
     renderMan.anim.isLive = true;
   } else { // we ARE live -> check if we have changed the page while writing
     if (!data.noteIdEquals(currentlivePageId, stroke.noteId)) {
       renderMan.clearPage(); // clear the page, since we have changed pages while writing
-      setPageNumberDisplay(stroke.noteId.pageNum);
+      setPageNumberDisplay(stroke.noteId);
       resetNoise = true; // cause a glitch
     }
   }
@@ -481,8 +481,9 @@ startIdleMode();
 /* 
   Page Number Display
  */
-
 function setPageNumberDisplay(n) {
   debug('SETTING PAGE NUM', n);
+  if ( n && n.pageNum ) { n = data.noteIdToBookPageNum(n); } // translate noteId to page number
+  if ( n === undefined ) return;
   document.getElementById('pageNum').textContent = n;
 }
