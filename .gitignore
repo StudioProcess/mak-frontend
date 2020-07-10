@@ -68,3 +68,5 @@ app/assets/fonts/*
 
 # electron-packager output
 build
+
+.DS_Store
